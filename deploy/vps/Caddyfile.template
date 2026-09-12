@@ -1,0 +1,8 @@
+# HTTPS via Let's Encrypt on the sslip.io name; basic auth on everything.
+__HOST__ {
+	encode zstd gzip
+	basic_auth {
+		admin __HASH__
+	}
+	reverse_proxy 127.0.0.1:8080
+}

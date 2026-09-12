@@ -122,3 +122,23 @@ CSV decompression, not by the sampling.
 - Written to a `.part` file, SHA-256 verified against the published `.CHECKSUM`, then renamed.
 - Up to 5 attempts with linear backoff on connection errors. A 404 returns `None`.
 - `MAX_DL_WORKERS = 3` for `prefetch`; files are large and the host is shared.
+
+### Other sources of historical Binance L1
+
+Nothing else free and complete exists for the perp after 2024-03-30, but these fill parts of the
+gap. Full detail and prices in [Sources & costs](../notes/sources-and-costs.md); "100 ms" means
+top-of-book read off the throttled depth stream rather than the native tick feed (see
+[data sources survey](../notes/data-sources.md#2-perp-l1-after-2024-03-30)).
+
+| Source | Granularity | Coverage | Cost | Reads into `bookticker`? |
+|---|---|---|---|---|
+| Tardis.dev `book_ticker` — free days | tick | 1st of each month, 2019-11 → | free | yes, via `tardis_free_days` |
+| Tardis.dev 30-day trial | tick | random 7–14 recent days | free, no card | same file format — drop into `data/raw/tardis/` |
+| CryptoHFTData | ~26 ms L2 diffs, L1 via replay | 2025-06-28 → | free | not yet (needs an L2 → L1 replay step; no snapshots, so warm up from empty) |
+| Crypto Lake `level_1` / `book_delta_v2` | 100 ms / tick | 2022-11-14 → | $64 one month | not yet (columns `origin_time, received_time, bid_0_price…`) |
+| CoinAPI `T-QUOTES` flat files | 100–250 ms, tick after a 2025 cutover | ~2019 → | per GiB, ≈ $35–40 for the gap | not yet |
+| Tardis.dev paid | tick | 2019-11-17 → | $350+/mo | same as free days |
+| Binance COIN-M `BTCUSD_PERP` archive | tick | 2023-05-18 → 2024-10-14 | free | yes — `sample_book("BTCUSD_PERP", …)` with `VISION_BASE` pointed at `futures/cm` |
+
+"Not yet" means a small adapter in `iter_batches` (rename columns, scale timestamps) would be
+needed; the Tardis adapter (`_tardis_to_archive`) is the template.

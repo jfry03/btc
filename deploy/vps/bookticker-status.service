@@ -1,0 +1,13 @@
+[Unit]
+Description=bookTicker recorder status page (127.0.0.1:8080, behind Caddy)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/btc
+ExecStart=/opt/btc/venv/bin/python -m data_collection.status_site --port 8080 --raw-dir data/raw --symbol BTCUSDT
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -72,12 +72,16 @@ nav:
       - "L1 book: historical": data/bookticker.md
       - "L1 book: live recorder": data/record-bookticker.md
       - "L1 book: Tardis free days": data/tardis.md
+      - "L1 book: compaction": data/compact.md
   - Reference:
       - data_collection.bookticker: reference/bookticker.md
       - data_collection.klines: reference/klines.md
       - data_collection.record_bookticker: reference/record-bookticker.md
       - data_collection.tardis_free_days: reference/tardis-free-days.md
+      - data_collection.compact: reference/compact.md
+      - data_collection.status_site: reference/status_site.md
   - Notes:
+      - VPS deployment: notes/vps.md
       - Data sources survey: notes/data-sources.md
       - Sources & costs: notes/sources-and-costs.md
       - Binance data quirks: notes/binance-quirks.md

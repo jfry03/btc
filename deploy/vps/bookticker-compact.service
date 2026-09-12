@@ -1,0 +1,9 @@
+[Unit]
+Description=Compact closed bookTicker days to Parquet
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/btc
+ExecStart=/opt/btc/venv/bin/python -m data_collection.compact
+Nice=15
+IOSchedulingClass=idle

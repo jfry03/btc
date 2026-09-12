@@ -9,6 +9,7 @@ package, so `sample_book` works over any day for which *some* source exists:
 
     data/raw/<SYMBOL>-bookTicker-<day>.zip          Binance archive
     data/raw/<SYMBOL>-bookTicker-<day>.csv.gz       record_bookticker (live recorder)
+    data/raw/<SYMBOL>-bookTicker-<day>.parquet      compact (recorder output, compacted)
     data/raw/tardis/binance-futures_book_ticker_<day>_<SYMBOL>.csv.gz   tardis_free_days
 
 Two public functions:
@@ -33,6 +34,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pcmp
 import pyarrow.csv as pc
+import pyarrow.parquet as pq
 import requests
 
 VISION_BASE = "https://data.binance.vision/data/futures/um"
@@ -98,7 +100,8 @@ def fetch_day(symbol: str, day: date) -> tuple[Path, bool] | None:
     p = download_archive(symbol, day.strftime("%Y-%m"), monthly=True)
     if p is not None:
         return p, True
-    for local in (RAW_DIR / f"{symbol}-bookTicker-{day:%Y-%m-%d}.csv.gz",
+    for local in (RAW_DIR / f"{symbol}-bookTicker-{day:%Y-%m-%d}.parquet",
+                  RAW_DIR / f"{symbol}-bookTicker-{day:%Y-%m-%d}.csv.gz",
                   TARDIS_DIR / f"binance-futures_book_ticker_{day:%Y-%m-%d}_{symbol}.csv.gz"):
         if local.exists() and local.stat().st_size > 0:
             return local, False
@@ -127,9 +130,16 @@ def _tardis_to_archive(b: pa.RecordBatch) -> pa.RecordBatch:
 
 
 def iter_batches(path: Path, block_size: int = 64 << 20) -> Iterator[pa.RecordBatch]:
-    """Stream a bookTicker CSV (.zip archive, or .csv.gz from the recorder / Tardis) as Arrow
-    record batches (~1M rows each), always in the archive column layout."""
+    """Stream a bookTicker file (.zip archive, .csv.gz from the recorder / Tardis, or .parquet
+    from compact) as Arrow record batches (~1M rows each), always in the archive column layout."""
     tardis = path.name.startswith("binance-futures_")
+    if path.suffix == ".parquet":
+        from .compact import decode
+        pf = pq.ParquetFile(path)
+        for b in pf.iter_batches(batch_size=1_000_000):
+            if b.num_rows:
+                yield decode(pa.Table.from_batches([b])).combine_chunks().to_batches()[0]
+        return
     if path.suffix == ".zip":
         z = zipfile.ZipFile(path)
         fh = z.open(z.namelist()[0])

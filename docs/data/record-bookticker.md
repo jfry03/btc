@@ -76,3 +76,8 @@ network + processing latency, which the log reports once a minute.
 !!! note "Spot has no exchange timestamps"
     The spot `bookTicker` payload carries only `u`, `b`, `B`, `a`, `A`. For spot,
     `transaction_time` and `event_time` are both filled with local time.
+
+## In production
+
+The recorder runs on the VPS as a systemd service, with nightly [compaction](compact.md) and a
+sync script that pulls finished days here — see [VPS deployment](../notes/vps.md).

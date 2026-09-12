@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly compaction of closed bookTicker days
+
+[Timer]
+OnCalendar=*-*-* 00:20:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -21,17 +21,20 @@ The `data_collection` package holds one module per source. Conventions shared by
 
 ## L1 sources and the fallback chain
 
-Binance published futures `bookTicker` archives only from 2023-05-16 to 2024-03-30. Three
-collectors fill in the rest, and `bookticker.fetch_day` checks them in order:
+Binance published futures `bookTicker` archives only from 2023-05-16 to 2024-03-30. The
+collectors below fill in the rest, and `bookticker.fetch_day` checks them in order. Paid and
+other third-party sources (Crypto Lake, CoinAPI, CryptoHFTData, …) are compared in
+[Sources & costs](../notes/sources-and-costs.md).
 
 | Order | Source | File | Days covered |
 |---|---|---|---|
 | 1 | Binance daily archive | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM-DD}.zip` | 2023-05-16 → 2024-03-30 |
 | 2 | Binance monthly archive | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM}.zip` | Same range; 2024-04 is a 7-hour fragment |
-| 3 | Live recorder | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM-DD}.csv.gz` | Whenever `record_bookticker` was running |
-| 4 | Tardis free day | `data/raw/tardis/binance-futures_book_ticker_{YYYY-MM-DD}_{SYMBOL}.csv.gz` | 1st of each month, 2019-11 → now |
+| 3 | Compacted recorder day | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM-DD}.parquet` | Recorder days after nightly `compact` |
+| 4 | Live recorder | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM-DD}.csv.gz` | Whenever `record_bookticker` was running |
+| 5 | Tardis free day | `data/raw/tardis/binance-futures_book_ticker_{YYYY-MM-DD}_{SYMBOL}.csv.gz` | 1st of each month, 2019-11 → now |
 
-Sources 1–2 are downloaded on demand; 3–4 must already be on disk (run the recorder, or
+Sources 1–2 are downloaded on demand; 3–5 must already be on disk (run the recorder, or
 `tardis_free_days`, first). `bookticker.iter_batches` normalises all four into the archive
 column layout, so `sample_book` and `load_bookticker` don't care where a day came from.
 

@@ -1,0 +1,15 @@
+[Unit]
+Description=Binance bookTicker recorder (BTCUSDT perp)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/btc
+ExecStart=/opt/btc/venv/bin/python -m data_collection.record_bookticker --symbol BTCUSDT --market um
+Restart=always
+RestartSec=3
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

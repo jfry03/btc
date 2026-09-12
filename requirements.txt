@@ -1,0 +1,17 @@
+numpy
+pandas
+polars
+pyarrow
+scipy
+scikit-learn
+xgboost
+lightgbm
+statsmodels
+torch
+matplotlib
+optuna
+numba
+tqdm
+joblib
+jupyter
+ipykernel

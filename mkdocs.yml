@@ -1,0 +1,83 @@
+site_name: btc
+site_description: Binance BTC market-data tooling — historical klines and L1 order book
+site_url: https://jfry03.github.io/btc/
+repo_url: https://github.com/jfry03/btc
+repo_name: jfry03/btc
+edit_uri: edit/master/docs/
+dev_addr: 127.0.0.1:80   # local preview at http://btc-docs (needs /etc/hosts entry, see Getting started)
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Data collection:
+      - Overview: data/index.md
+      - Klines (OHLCV): data/klines.md
+      - "L1 book: historical": data/bookticker.md
+      - "L1 book: live recorder": data/record-bookticker.md
+      - "L1 book: Tardis free days": data/tardis.md
+  - Reference:
+      - data_collection.bookticker: reference/bookticker.md
+      - data_collection.klines: reference/klines.md
+      - data_collection.record_bookticker: reference/record-bookticker.md
+      - data_collection.tardis_free_days: reference/tardis-free-days.md
+  - Notes:
+      - Data sources survey: notes/data-sources.md
+      - Sources & costs: notes/sources-and-costs.md
+      - Binance data quirks: notes/binance-quirks.md

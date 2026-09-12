@@ -1,8 +1,15 @@
 """
 Historical L1 (best bid/ask) for Binance USDⓈ-M futures from data.binance.vision.
 
-Coverage (BTCUSDT): daily archives 2023-05-16 -> 2024-03-30, monthly through 2024-04.
-Nothing before/after, nothing for spot. ~350 MB compressed / ~39M rows per day.
+Coverage (BTCUSDT): daily archives 2023-05-16 -> 2024-03-30; the 2024-04 monthly file is a
+fragment (first 7h of April 1). Nothing after, nothing for spot. ~350 MB / ~39M rows per day.
+
+For later days `fetch_day` falls back to files produced by the other collectors in this
+package, so `sample_book` works over any day for which *some* source exists:
+
+    data/raw/<SYMBOL>-bookTicker-<day>.zip          Binance archive
+    data/raw/<SYMBOL>-bookTicker-<day>.csv.gz       record_bookticker (live recorder)
+    data/raw/tardis/binance-futures_book_ticker_<day>_<SYMBOL>.csv.gz   tardis_free_days
 
 Two public functions:
 
@@ -13,6 +20,7 @@ Two public functions:
 from __future__ import annotations
 
 import concurrent.futures as cf
+import gzip
 import hashlib
 import time
 import zipfile
@@ -23,11 +31,13 @@ from typing import Iterator
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+import pyarrow.compute as pcmp
 import pyarrow.csv as pc
 import requests
 
 VISION_BASE = "https://data.binance.vision/data/futures/um"
 RAW_DIR     = Path("data/raw")
+TARDIS_DIR  = RAW_DIR / "tardis"
 VERIFY_SHA  = True
 MAX_DL_WORKERS = 3          # files are big; don't hammer it
 
@@ -88,6 +98,10 @@ def fetch_day(symbol: str, day: date) -> tuple[Path, bool] | None:
     p = download_archive(symbol, day.strftime("%Y-%m"), monthly=True)
     if p is not None:
         return p, True
+    for local in (RAW_DIR / f"{symbol}-bookTicker-{day:%Y-%m-%d}.csv.gz",
+                  TARDIS_DIR / f"binance-futures_book_ticker_{day:%Y-%m-%d}_{symbol}.csv.gz"):
+        if local.exists() and local.stat().st_size > 0:
+            return local, False
     return None
 
 
@@ -101,13 +115,31 @@ def prefetch(symbol: str, start: date, end: date) -> None:
 
 # --------------------------------------------------------------------------- streaming read
 
+def _tardis_to_archive(b: pa.RecordBatch) -> pa.RecordBatch:
+    """Tardis book_ticker/quotes columns -> archive layout. Tardis keeps only the exchange
+    event time (µs), so transaction_time is set equal to event_time and update_id is null."""
+    ev = pcmp.cast(pcmp.divide(b.column("timestamp"), 1000), pa.int64())
+    return pa.RecordBatch.from_arrays(
+        [pa.nulls(b.num_rows, pa.int64()), b.column("bid_price"), b.column("bid_amount"),
+         b.column("ask_price"), b.column("ask_amount"), ev, ev,
+         pcmp.cast(b.column("local_timestamp"), pa.int64())],
+        names=RAW_COLS + ["local_time"])
+
+
 def iter_batches(path: Path, block_size: int = 64 << 20) -> Iterator[pa.RecordBatch]:
-    """Stream the CSV inside a zip as Arrow record batches (~1M rows each)."""
-    with zipfile.ZipFile(path) as z, z.open(z.namelist()[0]) as fh:
+    """Stream a bookTicker CSV (.zip archive, or .csv.gz from the recorder / Tardis) as Arrow
+    record batches (~1M rows each), always in the archive column layout."""
+    tardis = path.name.startswith("binance-futures_")
+    if path.suffix == ".zip":
+        z = zipfile.ZipFile(path)
+        fh = z.open(z.namelist()[0])
+    else:
+        fh = gzip.open(path, "rb")
+    with fh:
         rdr = pc.open_csv(fh, read_options=pc.ReadOptions(block_size=block_size))
         for b in rdr:
             if b.num_rows:
-                yield b
+                yield _tardis_to_archive(b) if tardis else b
 
 
 def iter_day(symbol: str, day: date) -> Iterator[pa.RecordBatch]:
@@ -142,6 +174,10 @@ def load_bookticker(symbol: str, day: date) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- grid sampling
+
+def _last_row(b: pa.RecordBatch) -> dict:
+    return {c: (np.nan if (v := b.column(c)[-1].as_py()) is None else v) for c in STATE_COLS}
+
 
 def _to_ms(t: datetime) -> int:
     return int(t.astimezone(timezone.utc).timestamp() * 1000)
@@ -188,17 +224,17 @@ def sample_book(symbol: str, start: datetime, end: datetime, step_ms: int,
             t = b.column(ts_col).to_numpy()
             if t[-1] < grid[gi]:
                 offset += len(t)
-                last = {c: b.column(c)[-1].as_py() for c in STATE_COLS}
+                last = _last_row(b)
                 continue
             hi = gi + int(np.searchsorted(grid[gi:], t[-1], side="right"))   # grid points <= t[-1]
             if hi > gi:
-                b_np = {c: b.column(c).to_numpy() for c in STATE_COLS}
+                b_np = {c: b.column(c).to_numpy(zero_copy_only=False) for c in STATE_COLS}
                 idx = np.searchsorted(t, grid[gi:hi], side="right") - 1
                 emit(gi, hi, idx, b_np)
                 cum[gi:hi] = offset + idx + 1
                 gi = hi
             offset += len(t)
-            last = {c: b.column(c)[-1].as_py() for c in STATE_COLS}
+            last = _last_row(b)
             if gi >= n:
                 break
         day += timedelta(days=1)

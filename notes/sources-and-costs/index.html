@@ -1,0 +1,2988 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Binance BTC market-data tooling — historical klines and L1 order book">
+      
+      
+      
+        <link rel="canonical" href="https://jfry03.github.io/btc/notes/sources-and-costs/">
+      
+      
+        <link rel="prev" href="../data-sources/">
+      
+      
+        <link rel="next" href="../binance-quirks/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Sources & costs - btc</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#data-sources-what-each-gives-and-what-it-costs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="btc" class="md-header__button md-logo" aria-label="btc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            btc
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sources & costs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jfry03/btc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jfry03/btc
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="btc" class="md-nav__button md-logo" aria-label="btc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    btc
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jfry03/btc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jfry03/btc
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data collection
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data collection
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading (any source)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/klines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Klines (OHLCV)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: historical
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/record-bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: live recorder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/tardis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: Tardis free days
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/compact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: compaction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/market-hours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Market hours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/cryptohft/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: CryptoHFTData replay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/es-futures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES futures (CME)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/load/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.load
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.bookticker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/backfill_l1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.backfill_l1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cryptohft/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.cryptohft
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/klines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.klines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/record-bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.record_bookticker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/tardis-free-days/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.tardis_free_days
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/compact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.compact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/status_site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.status_site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/market_hours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.market_hours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/es_futures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.es_futures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPS deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data sources survey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sources & costs
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sources & costs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#binance-l1-and-prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binance — L1 and prices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Binance — L1 and prices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#binance-public-archives-databinancevision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binance public archives (data.binance.vision)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-recorder-data_collectionrecord_booktickerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live recorder (data_collection/record_bookticker.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tardisdev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tardis.dev
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cryptohftdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CryptoHFTData
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crypto-lake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crypto Lake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coinapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CoinAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kaiko-amberdata-coinmetrics-coindesk-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kaiko · Amberdata · CoinMetrics · CoinDesk Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-dumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community dumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chainlink-polymarket-the-settlement-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chainlink / Polymarket — the settlement price
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chainlink / Polymarket — the settlement price">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#polymarket-rtds-websocket-wssws-live-datapolymarketcom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polymarket RTDS WebSocket (wss://ws-live-data.polymarket.com)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pmdata-pmdatadev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PMData (pmdata.dev)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chainlink-data-streams-rest-apidataenginechainlink" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chainlink Data Streams REST (api.dataengine.chain.link)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-chain-polygon-btcusd-aggregator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-chain Polygon BTC/USD aggregator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binance-klines-for-the-other-polymarket-markets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binance klines (for the other Polymarket markets)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-centralised-exchanges-free-bulk-archives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other centralised exchanges (free bulk archives)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#polymarkets-own-market-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polymarket's own market data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Polymarket&#39;s own market data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enumerating-the-btc-markets-gamma-api-free" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enumerating the BTC markets (Gamma API, free)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polymarket-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polymarket APIs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-chain-polygon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-chain (Polygon)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-book-history-for-the-5m15m-markets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Order-book history for the 5m/15m markets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-oracles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other oracles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Other oracles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pyth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redstone-band-chronicle-switchboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RedStone · Band · Chronicle · Switchboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chainlink-push-feeds-on-other-chains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chainlink push feeds on other chains
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dex-perps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEX perps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DEX perps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hyperliquid-s3-archives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hyperliquid S3 archives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dydx-v4-gmx-aevo-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dYdX v4 · GMX · Aevo · Drift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tradfi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TradFi
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TradFi">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cme-bitcoin-futures-via-databento-glbxmdp3-symbols-btc-mbt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CME Bitcoin futures via Databento (GLBX.MDP3, symbols BTC / MBT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-e-mini-sp-500-futures-see-es-futures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ES (E-mini S&amp;P 500) futures — see ES futures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coinbase-kraken-spot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coinbase · Kraken spot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yahoo-finance-btcf-ibit-bito-btc-usd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Yahoo Finance (BTC=F, IBIT, BITO, BTC-USD)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregator-api-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregator / API providers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        At a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../binance-quirks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Binance data quirks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Source cross-validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#binance-l1-and-prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binance — L1 and prices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Binance — L1 and prices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#binance-public-archives-databinancevision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binance public archives (data.binance.vision)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-recorder-data_collectionrecord_booktickerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live recorder (data_collection/record_bookticker.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tardisdev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tardis.dev
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cryptohftdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CryptoHFTData
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crypto-lake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crypto Lake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coinapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CoinAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kaiko-amberdata-coinmetrics-coindesk-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kaiko · Amberdata · CoinMetrics · CoinDesk Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-dumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community dumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chainlink-polymarket-the-settlement-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chainlink / Polymarket — the settlement price
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chainlink / Polymarket — the settlement price">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#polymarket-rtds-websocket-wssws-live-datapolymarketcom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polymarket RTDS WebSocket (wss://ws-live-data.polymarket.com)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pmdata-pmdatadev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PMData (pmdata.dev)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chainlink-data-streams-rest-apidataenginechainlink" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chainlink Data Streams REST (api.dataengine.chain.link)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-chain-polygon-btcusd-aggregator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-chain Polygon BTC/USD aggregator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binance-klines-for-the-other-polymarket-markets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binance klines (for the other Polymarket markets)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-centralised-exchanges-free-bulk-archives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other centralised exchanges (free bulk archives)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#polymarkets-own-market-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polymarket's own market data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Polymarket&#39;s own market data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enumerating-the-btc-markets-gamma-api-free" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enumerating the BTC markets (Gamma API, free)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polymarket-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polymarket APIs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-chain-polygon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-chain (Polygon)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-book-history-for-the-5m15m-markets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Order-book history for the 5m/15m markets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-oracles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other oracles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Other oracles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pyth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redstone-band-chronicle-switchboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RedStone · Band · Chronicle · Switchboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chainlink-push-feeds-on-other-chains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chainlink push feeds on other chains
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dex-perps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEX perps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DEX perps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hyperliquid-s3-archives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hyperliquid S3 archives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dydx-v4-gmx-aevo-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dYdX v4 · GMX · Aevo · Drift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tradfi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TradFi
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TradFi">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cme-bitcoin-futures-via-databento-glbxmdp3-symbols-btc-mbt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CME Bitcoin futures via Databento (GLBX.MDP3, symbols BTC / MBT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-e-mini-sp-500-futures-see-es-futures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ES (E-mini S&amp;P 500) futures — see ES futures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coinbase-kraken-spot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coinbase · Kraken spot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yahoo-finance-btcf-ibit-bito-btc-usd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Yahoo Finance (BTC=F, IBIT, BITO, BTC-USD)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregator-api-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregator / API providers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        At a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="data-sources-what-each-gives-and-what-it-costs">Data sources: what each gives, and what it costs<a class="headerlink" href="#data-sources-what-each-gives-and-what-it-costs" title="Permanent link">&para;</a></h1>
+<p>One entry per source. "Tick" means every top-of-book change (Binance's native <code>bookTicker</code>
+feed); "100 ms" means top of book read off the throttled depth stream — see
+<a href="../data-sources/#2-perp-l1-after-2024-03-30">depth-derived</a> for why that matters.
+Prices checked 2026-09-12. Budget target: free, or a one-off &lt; $50.</p>
+<h2 id="binance-l1-and-prices">Binance — L1 and prices<a class="headerlink" href="#binance-l1-and-prices" title="Permanent link">&para;</a></h2>
+<h3 id="binance-public-archives-databinancevision">Binance public archives (<code>data.binance.vision</code>)<a class="headerlink" href="#binance-public-archives-databinancevision" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> spot &amp; futures klines, aggTrades, trades (2017/2020 → yesterday); futures
+  <code>bookTicker</code> <strong>tick L1 for 2023-05-16 → 2024-03-30 only</strong>; <code>bookDepth</code> percent-band liquidity
+  every 30 s (2023 → now); <code>metrics</code> (OI, long/short ratios), mark/index/premium klines, funding.</li>
+<li><strong>Granularity:</strong> tick (bookTicker), trade-level, or candles.</li>
+<li><strong>Cost:</strong> free, no key.</li>
+<li><strong>Access:</strong> <code>data_collection/bookticker.py</code>, <code>data_collection/klines.py</code>.</li>
+<li><strong>Catch:</strong> L1 discontinued after 2024-03-30, no return planned. Spot never had a book.</li>
+</ul>
+<h3 id="live-recorder-data_collectionrecord_booktickerpy">Live recorder (<code>data_collection/record_bookticker.py</code>)<a class="headerlink" href="#live-recorder-data_collectionrecord_booktickerpy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> native <code>bookTicker</code> for any symbol, from the moment you start it, written in the
+  archive layout so the rest of the code doesn't care.</li>
+<li><strong>Granularity:</strong> tick (~39M rows/day for BTCUSDT perp).</li>
+<li><strong>Cost:</strong> free; ~350 MB/day disk; must run continuously — every gap is lost forever.</li>
+</ul>
+<h3 id="tardisdev">Tardis.dev<a class="headerlink" href="#tardisdev" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> everything Binance ever streamed, recorded since 2019-11-17: <code>book_ticker</code> (tick
+  L1), <code>quotes</code> (100 ms L1), <code>incremental_book_L2</code>, <code>book_snapshot_5/25</code>, trades, liquidations,
+  funding. 18 logged outage incidents.</li>
+<li><strong>Free:</strong> the <strong>1st of every month</strong> as CSV, no key (<code>data_collection/tardis_free_days.py</code>);
+  a <strong>30-day trial</strong> with a random 7–14-day recent window, no card.</li>
+<li><strong>Paid:</strong> Perpetuals plan $350/mo (academic, needs .edu proof) / $700 solo / $1,000 pro,
+  quarterly or yearly billing only, no one-off purchases. Out of budget.</li>
+</ul>
+<h3 id="cryptohftdata">CryptoHFTData<a class="headerlink" href="#cryptohftdata" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> raw Binance futures <strong>L2 diffs</strong> as one Parquet per exchange/symbol/hour
+  (<code>binance_futures/&lt;YYYY-MM-DD&gt;/&lt;HH&gt;/BTCUSDT_orderbook.parquet</code>, 18–23 MB, 4–6M rows), plus
+  <code>BTCUSDT_trades.parquet</code> and <code>BTCUSDT_ticker.parquet</code> per hour. Columns: <code>received_time</code> (ns),
+  <code>event_time</code>/<code>transaction_time</code> (ms), <code>first/final/prev_final_update_id</code>, <code>side</code>, <code>price</code>,
+  <code>quantity</code> (strings; <code>0</code> = level removed).</li>
+<li><strong>Coverage:</strong> <strong>2025-06-28 → now</strong>, ~15 min behind live.</li>
+<li><strong>Granularity (verified):</strong> diff events every <strong>~100 ms in mid-2025, ~52 ms from Oct 2025,
+  ~26 ms by Sep 2026</strong> (p10–p90 26–28 ms on 2026-09-01), ~43 level changes per event, update-id
+  chain <strong>unbroken</strong> within the hour. Changes inside an event window are collapsed — not per-change
+  like <code>bookTicker</code>. Replayed L1 prices match the native feed 98 % of seconds; <strong>quantities only
+  ~55 %</strong> (see <a href="../validation/">validation</a>). <strong>No snapshots</strong> in the files (only <code>event_type = update</code>), so replay from an empty
+  book: fine for L1 after a few seconds' warm-up (the top of book is touched constantly), not for
+  deep levels.</li>
+<li><strong>Cost:</strong> free anonymous download (60 req/min; URL 302s to Cloudflare R2, use <code>curl -L</code>);
+  S3 bulk access needs an account. ~500 MB/day of order-book Parquet.</li>
+<li><strong>Access:</strong> <code>https://api.cryptohftdata.com/download?file=binance_futures/&lt;day&gt;/&lt;HH&gt;/BTCUSDT_orderbook.parquet</code>.
+  Needs an L2→L1 replay adapter to feed <code>bookticker</code> (not written yet).</li>
+</ul>
+<h3 id="crypto-lake">Crypto Lake<a class="headerlink" href="#crypto-lake" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> <code>level_1</code> (best bid/ask + size), <code>book</code> (20 levels), <code>book_delta_v2</code> (every L2
+  change), trades, funding, OI, liquidations for <code>BTC-USDT-PERP</code>.</li>
+<li><strong>Coverage:</strong> book/level_1 <strong>2022-11-14 → now</strong>, ~98 % complete.</li>
+<li><strong>Granularity:</strong> <code>level_1</code>/<code>book</code> 100 ms depth-derived; <code>book_delta_v2</code> tick.</li>
+<li><strong>Cost:</strong> <strong>$64 for one month</strong> (individual), 300 GB/mo cap, cancel anytime. Fits budget for
+  a one-off backfill of 2024-04 → 2025-06.</li>
+</ul>
+<h3 id="coinapi">CoinAPI<a class="headerlink" href="#coinapi" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> <code>T-QUOTES</code> flat files for <code>BINANCEFTS_PERP_BTC_USDT</code> (best bid/ask + size), also
+  L2 and trades; REST <code>quotes/history</code> for spot checks.</li>
+<li><strong>Coverage:</strong> ~2019 → now.</li>
+<li><strong>Granularity:</strong> 100–250 ms depth-derived until an unspecified 2025 cutover, then tick.
+  Cutover date for futures not published — ask support before buying.</li>
+<li><strong>Cost:</strong> pay-as-you-go, $8/GiB for the first 0.5 GiB per day, $4/GiB to 5 GiB, $2/GiB after.
+  Whole gap ≈ <strong>$35–40</strong> if files are the small depth-derived kind; $350+ if tick-scale. No free tier.</li>
+</ul>
+<h3 id="kaiko-amberdata-coinmetrics-coindesk-data">Kaiko · Amberdata · CoinMetrics · CoinDesk Data<a class="headerlink" href="#kaiko-amberdata-coinmetrics-coindesk-data" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> tick L1/L2 for Binance perps, long history (Kaiko TOB since Dec 2022).</li>
+<li><strong>Cost:</strong> enterprise contracts, ~$9.5k–$55k/yr. Not viable.</li>
+</ul>
+<h3 id="community-dumps">Community dumps<a class="headerlink" href="#community-dumps" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>HuggingFace <code>predict-quant/binance-future-orderbook</code>:</strong> <code>depth20@100ms</code> for
+  2026-03-05 → 2026-04-08, patchy days. Free. 100 ms.</li>
+<li><strong>HuggingFace <code>Goooddy/crypto-lob-stream</code>:</strong> Binance spot L2 Jun–Aug 2026; futures promised
+  from Sept 2026, not published yet. Free.</li>
+<li><strong>Kaggle:</strong> several BTC book datasets (Jan–Apr 2024, one day in Jun 2024, Jan–Mar 2025) with
+  undocumented venue — not reliable enough to build on.</li>
+</ul>
+<h2 id="chainlink-polymarket-the-settlement-price">Chainlink / Polymarket — the settlement price<a class="headerlink" href="#chainlink-polymarket-the-settlement-price" title="Permanent link">&para;</a></h2>
+<h3 id="polymarket-rtds-websocket-wssws-live-datapolymarketcom">Polymarket RTDS WebSocket (<code>wss://ws-live-data.polymarket.com</code>)<a class="headerlink" href="#polymarket-rtds-websocket-wssws-live-datapolymarketcom" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> <code>crypto_prices_twap_sixty</code> (the 15m/5m/4h settlement feed), <code>crypto_prices_chainlink</code>
+  (CexPrice), <code>crypto_prices</code> (Binance), 1 msg/s each.</li>
+<li><strong>Coverage:</strong> live only — ~58 s snapshot on subscribe, no replay.</li>
+<li><strong>Cost:</strong> free, no auth. <strong>Record it</strong> (recorder not yet written).</li>
+</ul>
+<h3 id="pmdata-pmdatadev">PMData (<code>pmdata.dev</code>)<a class="headerlink" href="#pmdata-pmdatadev" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> recorded Chainlink <code>streams</code> (CexPrice), <code>streams_twap60s</code>, <code>streams_twap30s</code> as
+  parquet, 1 row/s, plus Polymarket market data.</li>
+<li><strong>Coverage:</strong> Feb 2026 → now.</li>
+<li><strong>Cost:</strong> <strong>$49/mo Plus</strong>; one-day free samples at <code>api.pmdata.dev/examples/chainlink/…</code>.
+  Only third-party archive of the actual settlement stream found.</li>
+</ul>
+<h3 id="chainlink-data-streams-rest-apidataenginechainlink">Chainlink Data Streams REST (<code>api.dataengine.chain.link</code>)<a class="headerlink" href="#chainlink-data-streams-rest-apidataenginechainlink" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> every report of the BTC/USD CexPrice stream (1/s, since 2024-03-19) and TWAP streams.</li>
+<li><strong>Cost:</strong> <strong>$150/mo per feed, no free tier.</strong> Out of budget.</li>
+</ul>
+<h3 id="on-chain-polygon-btcusd-aggregator">On-chain Polygon BTC/USD aggregator<a class="headerlink" href="#on-chain-polygon-btcusd-aggregator" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> every on-chain round: price, roundId, updatedAt. Proxy
+  <code>0xc907E116054Ad103354f2D350FD2514433D57F6f</code>, 0.1 % deviation / 27 s heartbeat → ~2,600
+  points/day. Full history back to 2020-10 (phases 1–3).</li>
+<li><strong>Cost:</strong> free — <code>eth_getLogs</code> on <code>polygon-bor-rpc.publicnode.com</code> (10k blocks/call, ~1 year in
+  ~2,100 calls) or Dune's <code>chainlink_polygon.price_feeds</code>.</li>
+<li><strong>Catch:</strong> same underlying price as the settlement feed, but <strong>not</strong> the settlement feed —
+  it's the sparse on-chain view, and only the 5m/15m/4h markets use Chainlink at all.</li>
+</ul>
+<h3 id="binance-klines-for-the-other-polymarket-markets">Binance klines (for the other Polymarket markets)<a class="headerlink" href="#binance-klines-for-the-other-polymarket-markets" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Hourly/daily "Up or Down" and "BTC above $X" resolve on <strong>Binance BTCUSDT 1h/1m candles</strong>, which
+  <code>data_collection/klines.py</code> already pulls for free.</li>
+</ul>
+<h2 id="other-centralised-exchanges-free-bulk-archives">Other centralised exchanges (free bulk archives)<a class="headerlink" href="#other-centralised-exchanges-free-bulk-archives" title="Permanent link">&para;</a></h2>
+<p>All free and no account unless stated; verified 2026-09-12 by fetching the example files. Not
+Binance, so a different order book — but several of these give exactly what Binance withholds:
+long, free, snapshot + diff L2 history at ≤100 ms.</p>
+<table>
+<thead>
+<tr>
+<th>Exchange</th>
+<th>Data (BTC)</th>
+<th>Granularity</th>
+<th>Coverage</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bybit</strong> trades (<code>public.bybit.com</code>)</td>
+<td>perp / inverse / spot tick trades, csv.gz</td>
+<td>tick</td>
+<td>perp BTCUSDT 2020-03-25 →, spot 2022-11 →</td>
+<td><code>https://public.bybit.com/trading/BTCUSDT/BTCUSDT2026-09-10.csv.gz</code> (68 MB, 2M trades)</td>
+</tr>
+<tr>
+<td><strong>Bybit L2</strong> (<code>quote-saver.bycsi.com</code>)</td>
+<td><strong>500-level (→200 since 2025-08) snapshot + deltas</strong>, NDJSON of WS messages</td>
+<td>~100 ms deltas</td>
+<td>linear BTCUSDT <strong>2023-01-18 →</strong>, inverse same, spot 2025-04 →</td>
+<td><code>https://quote-saver.bycsi.com/orderbook/linear/BTCUSDT/2024-01-01_BTCUSDT_ob500.data.zip</code> (50–215 MB/day; directory listings work)</td>
+</tr>
+<tr>
+<td><strong>OKX</strong> (<code>static.okx.com</code>)</td>
+<td>trades, 1m candles, funding, <strong>400-level L2 snapshot (every 60 s) + updates</strong>, 5000-level L2</td>
+<td>trades tick; <strong>L2 updates ~10 ms median</strong></td>
+<td>trades spot 2021-09 →, SWAP 2021-10 →; <strong>400-lv L2 2023-03-22 →</strong> (lags a few days); 5000-lv 2025-11 →</td>
+<td><code>https://static.okx.com/cdn/okx/match/orderbook/L2/400lv/daily/20240101/BTC-USDT-SWAP-L2orderbook-400lv-2024-01-01.tar.gz</code> (~377 MB/day). No VIP gate found. Trade/candle files use <strong>UTC+8</strong> day boundaries</td>
+</tr>
+<tr>
+<td><strong>Gate.io</strong> (<code>download.gatedata.org</code>)</td>
+<td>spot deals, futures trades, 1m candles, mark, funding, <strong>L2 order books (hourly, snapshot + 100 ms-merged updates)</strong></td>
+<td>tick; L2 100 ms</td>
+<td>deals 2018 →; <strong>L2 spot &amp; futures_usdt 2021-08 → now — longest free L2 history found</strong></td>
+<td><code>https://download.gatedata.org/futures_usdt/orderbooks/202401/BTC_USDT-2024010100.csv.gz</code> (9 MB/h, no header)</td>
+</tr>
+<tr>
+<td><strong>KuCoin</strong> (<code>historical-data.kucoin.com</code>)</td>
+<td>spot &amp; perp trades, klines, <strong>50-level L2 snapshots</strong>, funding/mark/index</td>
+<td>tick; L2 ~100 ms snapshots</td>
+<td>trades 2023 →; L2 spot 2025-01 →, perp 2025-02 →</td>
+<td><code>https://historical-data.kucoin.com/data/spot/daily/depth/orderbooklv50/BTC-USDT/BTC-USDT-orderbooklv50-2025-01-14.zip</code></td>
+</tr>
+<tr>
+<td><strong>HTX / Huobi</strong> (<code>futures.htx.com/data</code>)</td>
+<td>trades, 1m klines, mark/index; new tree adds <strong>L2 400-lv spot / 150-lv perp snapshot + diff</strong></td>
+<td>tick; L2 diffs 20–120 ms</td>
+<td>trades 2020-06 →; <strong>L2 2026-05-28 →</strong></td>
+<td><code>https://futures.htx.com/data/historical_data/spot/daily/orderbook/lv400/BTC-USDT/BTC-USDT-l2orderbook-400lv-2026-09-11.tar.gz</code></td>
+</tr>
+<tr>
+<td><strong>Bitget</strong> (<code>img.bitgetimg.com</code>)</td>
+<td>spot &amp; perp trades, 1m klines (xlsx), <strong>L1 bookTicker</strong> (irregular, 5–20 s), 500-level depth snapshots (~20 s)</td>
+<td>tick trades; coarse book</td>
+<td>trades 2018-08 →; L1 2024-12 →; depth 2026-01 →</td>
+<td><code>https://img.bitgetimg.com/online/trades/SPBL/BTCUSDT/BTCUSDT_SPBL_20240101_001.zip</code></td>
+</tr>
+<tr>
+<td><strong>BitMEX</strong> (<code>public.bitmex.com</code>)</td>
+<td>daily <strong>L1 quote</strong> and trade CSVs, all symbols</td>
+<td>tick (ns)</td>
+<td><strong>2014-11-22 →</strong></td>
+<td><code>https://s3-eu-west-1.amazonaws.com/public.bitmex.com/data/quote/20200101.csv.gz</code> (recent trade files look incomplete; quotes fine)</td>
+</tr>
+<tr>
+<td><strong>MEXC</strong></td>
+<td>5m+ klines only</td>
+<td>5 m</td>
+<td>2023 →</td>
+<td>weakest source</td>
+</tr>
+<tr>
+<td><strong>Coinbase Exchange</strong> (REST)</td>
+<td>every BTC-USD trade by id, candles 1m+</td>
+<td>tick (µs)</td>
+<td><strong>2015-01-08 →</strong> (~1.09 B trades, 1000/request)</td>
+<td><code>https://api.exchange.coinbase.com/products/BTC-USD/trades?limit=1000&amp;after=500000000</code></td>
+</tr>
+<tr>
+<td><strong>Kraken</strong></td>
+<td>bulk OHLCVT zip (all pairs, 1m+, 7.3 GB on Google Drive) + quarterly updates; REST trades</td>
+<td>1 m bulk; tick via REST</td>
+<td>XBTUSD <strong>2013-10 →</strong></td>
+<td><code>https://api.kraken.com/0/public/Trades?pair=XBTUSD&amp;since=0</code></td>
+</tr>
+<tr>
+<td><strong>Kraken Futures</strong></td>
+<td>1m candles; public <strong>order-event history</strong> (placed/updated/cancelled — effectively L3)</td>
+<td>ms</td>
+<td>PF_XBTUSD 2022-03 →</td>
+<td><code>https://futures.kraken.com/api/history/v3/market/PF_XBTUSD/orders?since=1700000000000&amp;sort=asc&amp;count=1000</code></td>
+</tr>
+<tr>
+<td><strong>Bitfinex</strong> (REST)</td>
+<td>trades, candles 1m+, perp</td>
+<td>tick</td>
+<td>trades <strong>2013-01 →</strong>, 10,000/request</td>
+<td><code>https://api-pub.bitfinex.com/v2/trades/tBTCUSD/hist?start=0&amp;limit=10000&amp;sort=1</code></td>
+</tr>
+<tr>
+<td><strong>Bitstamp</strong> (REST)</td>
+<td>1m OHLC from 2012; transactions last 24 h only</td>
+<td>1 m</td>
+<td>2012 →</td>
+<td><code>https://www.bitstamp.net/api/v2/ohlc/btcusd/?step=60&amp;limit=1000&amp;start=1325376000</code></td>
+</tr>
+<tr>
+<td><strong>Deribit</strong> (REST)</td>
+<td>1m candles from 2018-08; trades only ~24–36 h back</td>
+<td>1 m</td>
+<td>2018-08 →</td>
+<td>use Tardis free days for tick</td>
+</tr>
+<tr>
+<td><strong>Tardis free days</strong> (all of the above venues + Hyperliquid, Coinbase Intl…)</td>
+<td><code>quotes</code> (tick L1), <code>book_snapshot_5/25</code>, <code>incremental_book_L2</code>, trades</td>
+<td>tick</td>
+<td>1st of each month from each venue's start</td>
+<td><code>https://datasets.tardis.dev/v1/bybit/quotes/2024/01/01/BTCUSDT.csv.gz</code></td>
+</tr>
+</tbody>
+</table>
+<p>Takeaways: <strong>Gate.io (2021-08 →), Bybit (2023-01 →) and OKX (2023-03 →) give free snapshot+diff
+L2 for BTC perps at ≤100 ms</strong>, which is finer than anything free for Binance in the same period;
+<strong>BitMEX</strong> is the only venue with a free tick L1 archive back to 2014. REST lookback traps:
+Deribit trades ~24 h, OKX history-trades ~3 months, Bitget fills 90 d, Gate spot trades 30 d,
+MEXC 24 h. OKX and old HTX files use UTC+8 day boundaries; KuCoin/OKX legacy rows aren't time-sorted.</p>
+<h2 id="polymarkets-own-market-data">Polymarket's own market data<a class="headerlink" href="#polymarkets-own-market-data" title="Permanent link">&para;</a></h2>
+<p>Verified 2026-09-12. Context: Polymarket moved to <strong>CTF Exchange V2</strong>
+(<code>0xE111180000d2663C0091e4f400237545B87B996B</code>) in April 2026; the old CTF/NegRisk contracts and
+the Goldsky public subgraphs are dead for new data.</p>
+<h3 id="enumerating-the-btc-markets-gamma-api-free">Enumerating the BTC markets (Gamma API, free)<a class="headerlink" href="#enumerating-the-btc-markets-gamma-api-free" title="Permanent link">&para;</a></h3>
+<p>Slugs: <code>btc-updown-5m-&lt;unix&gt;</code> (288/day, since 2025-12-18), <code>btc-updown-15m-&lt;unix&gt;</code> (96/day,
+900 s-aligned, since 2025-09-12; older ones <code>btc-up-or-down-15m-&lt;unix&gt;</code>), <code>btc-updown-4h-&lt;unix&gt;</code>,
+<code>bitcoin-up-or-down-&lt;month&gt;-&lt;d&gt;-2026-&lt;h&gt;am-et</code> (hourly), <code>bitcoin-above-on-…</code> (multi-strike hourly,
+since 2026-03-20), daily series since 2023. Series ids: 5m 10684 · 15m 10192 · 4h 10331 · hourly
+10114 · daily 41. Page with
+<code>https://gamma-api.polymarket.com/events/keyset?series_id=10192&amp;closed=true&amp;limit=100</code> → <code>next_cursor</code>.
+Each market gives <code>conditionId</code>, <code>clobTokenIds</code>, and for closed markets <code>outcomePrices</code> (= the result).</p>
+<h3 id="polymarket-apis">Polymarket APIs<a class="headerlink" href="#polymarket-apis" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>What</th>
+<th>Granularity</th>
+<th>Coverage</th>
+<th>Limits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CLOB <code>/prices-history</code></strong></td>
+<td>outcome-token price series per <code>clobTokenId</code> (<code>startTs/endTs/fidelity</code>; <code>interval=max</code> empty for old markets)</td>
+<td><strong>~60 s samples</strong> (~15 points per 15m market)</td>
+<td>verified back to Sept 2025</td>
+<td>free, 1000 req/10 s</td>
+</tr>
+<tr>
+<td><strong>Data API <code>/trades?market=&lt;conditionId&gt;</code></strong></td>
+<td>every fill: side, price, size, wallet, tx, timestamp</td>
+<td>tick</td>
+<td>≥ 270 days back; <code>limit≤1000</code>, <code>offset</code> works</td>
+<td>free, 200 req/10 s — 429s on bursts</td>
+</tr>
+<tr>
+<td>CLOB <code>/book</code></td>
+<td>live book only; errors for closed tokens</td>
+<td>live</td>
+<td>none</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CLOB <code>/trades</code></td>
+<td>needs an L2 API key</td>
+<td>—</td>
+<td>—</td>
+<td>account</td>
+</tr>
+<tr>
+<td><strong>CLOB WebSocket</strong> <code>wss://ws-subscriptions-clob.polymarket.com/ws/market</code></td>
+<td>live book + price changes — what every vendor below records</td>
+<td>tick</td>
+<td>live only</td>
+<td>free — <strong>record it</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="on-chain-polygon">On-chain (Polygon)<a class="headerlink" href="#on-chain-polygon" title="Permanent link">&para;</a></h3>
+<p>V2 <code>OrderFilled(bytes32 orderHash, address maker, address taker, uint8 side, uint256 tokenId,
+uint256 makerAmountFilled, uint256 takerAmountFilled, uint256 fee, bytes32 builder, bytes32 metadata)</code>,
+topic <code>0xd543adfd945773f1a62f74f0ee55a5e3b9b1a28262980ba90b1a89f2ea84d8ee</code> (the V1 hash quoted on
+some sites is wrong). ~3M fills/day across all markets. Free archive access:
+<strong>Tenderly public gateway</strong> <code>polygon.gateway.tenderly.co</code> (<code>eth_getLogs</code>, ~2000 blocks/call,
+30–40 s each); publicnode is pruned to recent blocks; Envio HyperSync needs a (free) token;
+Dune <code>polymarket_polygon.market_trades</code> has decoded v1+v2 fills with ~1 h lag (free-plan credits).</p>
+<h3 id="order-book-history-for-the-5m15m-markets">Order-book history for the 5m/15m markets<a class="headerlink" href="#order-book-history-for-the-5m15m-markets" title="Permanent link">&para;</a></h3>
+<p>Polymarket keeps none. Third parties:</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>What</th>
+<th>Granularity</th>
+<th>Coverage</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PMData</strong> (<code>pmdata.dev</code>)</td>
+<td>L2 snapshots + every price-change tick, trades, on-chain fills, Chainlink/TWAP; one Parquet per market slug, 7 coins × 5m/15m/1h (YES side; NO by symmetry)</td>
+<td>every book update, µs</td>
+<td>since 2026-02</td>
+<td><strong>free: 1,200 Up/Down market files, then 100/month</strong>; Plus $49/mo</td>
+</tr>
+<tr>
+<td><strong>PredictionTicks</strong></td>
+<td>BTC <strong>5m only</strong>: tick prices CSV + full-depth book JSONL per round</td>
+<td>~1.5 s</td>
+<td>2026-02 → 2026-08 (books from Apr)</td>
+<td><strong>$15 one-off</strong>; free daily samples verified</td>
+</tr>
+<tr>
+<td>HF <code>kachoio/polymarket-5-minute-crypto-up-down-markets</code></td>
+<td>second-by-second top of book, 7 coins, 5m markets (<code>btc_ticks.parquet</code> 182 MB)</td>
+<td>1 s BBO</td>
+<td>2026-03-24 → 2026-05-18</td>
+<td>free</td>
+</tr>
+<tr>
+<td>HF <code>BrockMisner/polymarket-crypto-5m-15m</code></td>
+<td>10-level books every 10 s + trades + resolutions, BTC/ETH/SOL/XRP <strong>5m &amp; 15m</strong></td>
+<td>10 s</td>
+<td>2026-01-09 → 2026-03-13</td>
+<td>free</td>
+</tr>
+<tr>
+<td>HF <code>Ligengxin96/polymarket-predict-fun-tick-data</code></td>
+<td>one day (2026-09-08) of books + trades + Chainlink for BTC 5m</td>
+<td>tick</td>
+<td>1 day</td>
+<td>free</td>
+</tr>
+<tr>
+<td>PolyHistorical / PolymarketBacktest / PolymarketData.co / Telonex</td>
+<td>200–300 ms books, 1-min prices, etc.</td>
+<td>varies</td>
+<td>2025-08 →</td>
+<td>free tiers are tiny; $17–37/mo or undisclosed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="other-oracles">Other oracles<a class="headerlink" href="#other-oracles" title="Permanent link">&para;</a></h2>
+<h3 id="pyth">Pyth<a class="headerlink" href="#pyth" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> ~400 ms signed BTC/USD updates, full history via Hermes <code>/v2/updates/price/&lt;ts&gt;</code>.</li>
+<li><strong>Cost:</strong> <strong>API key required since 2026-08-26</strong>; free plan has no API, Starter $500/mo. Benchmarks
+  (the old free TradingView-style history) is gone. Not viable.</li>
+</ul>
+<h3 id="redstone-band-chronicle-switchboard">RedStone · Band · Chronicle · Switchboard<a class="headerlink" href="#redstone-band-chronicle-switchboard" title="Permanent link">&para;</a></h3>
+<ul>
+<li>RedStone gateway: 10 s slots, free, but only <strong>~48 h</strong> of history — record-it-yourself only.
+  Band's public endpoint is stale (last resolve Sep 2025); Chronicle/Switchboard expose no history.</li>
+</ul>
+<h3 id="chainlink-push-feeds-on-other-chains">Chainlink push feeds on other chains<a class="headerlink" href="#chainlink-push-feeds-on-other-chains" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> the same BTC/USD aggregator as Polygon, on other chains, via <code>AnswerUpdated</code> logs.</li>
+<li><strong>Density (measured):</strong> BNB <code>0x14Aed7178df8d33755b1c4b8f3CC3e0EAa2B203B</code> 0.05 % / 30 s → ~31 s;
+  Polygon ~33 s; Arbitrum / Base / Optimism ~20 min; Avalanche daily. Nothing beats Polygon by much.</li>
+<li><strong>Cost:</strong> free. Public RPCs serve recent logs only; full history needs a free-signup key
+  (Etherscan V2 <code>getLogs</code>, Alchemy, Infura).</li>
+</ul>
+<h2 id="dex-perps">DEX perps<a class="headerlink" href="#dex-perps" title="Permanent link">&para;</a></h2>
+<h3 id="hyperliquid-s3-archives">Hyperliquid S3 archives<a class="headerlink" href="#hyperliquid-s3-archives" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> <code>hyperliquid-archive/market_data/&lt;YYYYMMDD&gt;/&lt;H&gt;/l2Book/BTC.lz4</code> — L2 snapshots at
+  ~550 ms event-driven cadence; <code>hl-mainnet-node-data/node_fills_by_block/hourly/…lz4</code> — every
+  fill, all coins, ms timestamps; <code>asset_ctxs</code> daily CSV with oracle/mark/mid.</li>
+<li><strong>Coverage:</strong> 2023 → present (monthly uploads, gaps possible); fills from 2025-07 in the current layout.</li>
+<li><strong>Cost:</strong> requester-pays S3, ~$0.09/GB egress → ~0.8–1 GiB/day of fills ≈ <strong>$30/year</strong>. Needs any AWS account.</li>
+<li>REST <code>candleSnapshot</code> keeps only ~5,000 candles per interval (1m → 3.6 days).</li>
+</ul>
+<h3 id="dydx-v4-gmx-aevo-drift">dYdX v4 · GMX · Aevo · Drift<a class="headerlink" href="#dydx-v4-gmx-aevo-drift" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>dYdX</strong> indexer: free 1m candles (from 2023-12) and tick trades; thin (~1k trades/20 h).</li>
+<li><strong>GMX</strong> candles: 1m for ~2 weeks, 5m ~5 weeks, daily to 2021. Free.</li>
+<li><strong>Aevo <code>index-history</code></strong>: <strong>1-second</strong> CEX-spot composite index, free, no key, verified back to
+  <strong>Sep 2023</strong>, 500 rows/request (<code>https://api.aevo.xyz/index-history?asset=BTC&amp;resolution=1&amp;start_time=&lt;ns&gt;&amp;end_time=&lt;ns&gt;&amp;limit=500</code>).
+  Best free second-level spot reference found; occasional 2 s gaps. Not a settlement proxy.</li>
+<li><strong>Drift</strong> (<code>data.velocity.exchange</code>): free tick CSVs incl. oracle price per fill, but BTC-PERP is nearly empty.</li>
+</ul>
+<h2 id="tradfi">TradFi<a class="headerlink" href="#tradfi" title="Permanent link">&para;</a></h2>
+<h3 id="cme-bitcoin-futures-via-databento-glbxmdp3-symbols-btc-mbt">CME Bitcoin futures via Databento (<code>GLBX.MDP3</code>, symbols BTC / MBT)<a class="headerlink" href="#cme-bitcoin-futures-via-databento-glbxmdp3-symbols-btc-mbt" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gives:</strong> trades, MBP-1 (L1), TBBO, MBO, OHLCV-1s, ns timestamps; BTC from 2017-12, MBT from 2021-04.</li>
+<li><strong>Cost:</strong> per-GB, prices only visible after login; <strong>$125 free credits</strong> on signup (6 months) —
+  one front-month contract's trades/MBP-1 is MB/day, so a year should fit; Standard plan $179–199/mo.</li>
+</ul>
+<h3 id="es-e-mini-sp-500-futures-see-es-futures">ES (E-mini S&amp;P 500) futures — see <a href="../../data/es-futures/">ES futures</a><a class="headerlink" href="#es-e-mini-sp-500-futures-see-es-futures" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Databento <code>GLBX.MDP3</code></strong> is the only self-serve per-second-or-finer source: <code>ohlcv-1s</code>,
+  <code>trades</code>, <code>tbbo</code>, <code>mbp-1</code>, <code>mbo</code> for ES from 2010-06 (same dataset and script as BTC/MBT).
+  Metered per GB — rates visible only with a key — <strong>$125 free credit</strong>; a year of <code>ohlcv-1s</code>
+  is ~1.2 GB (estimate) and should fit, trades/BBO may not. <code>data_collection/es_futures.py</code>
+  costs every request before spending.</li>
+<li><strong>Yahoo <code>ES=F</code></strong>: free 1-minute bars, last 8 days only (verified); 5m → 60 d; 1h → 2 y.</li>
+<li><strong>FirstRate Data</strong>: 1-minute ES from 2008, one-off purchase (price not published on the page).</li>
+<li><strong>Massive (ex-Polygon.io)</strong>: 1 s aggregates, trades, quotes, flat files for CME futures —
+  free tier is end-of-day only, Starter $29/mo delayed; history depth unverified.</li>
+<li>Kaggle <code>choweric/cme-es</code>: daily per-contract OHLC/OI 2000–2022, free.</li>
+</ul>
+<h3 id="coinbase-kraken-spot">Coinbase · Kraken spot<a class="headerlink" href="#coinbase-kraken-spot" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Coinbase Exchange</strong> REST: every BTC-USD trade since <strong>2015-01</strong> (trade_id 1), 1000/page with
+  <code>cb-after</code> cursor, free, no key. ~1.1B trades total.</li>
+<li><strong>Kraken</strong>: REST <code>Trades?pair=XBTUSD&amp;since=&lt;ns&gt;</code> from 2015 + free quarterly bulk OHLCVT CSVs.</li>
+</ul>
+<h3 id="yahoo-finance-btcf-ibit-bito-btc-usd">Yahoo Finance (<code>BTC=F</code>, <code>IBIT</code>, <code>BITO</code>, <code>BTC-USD</code>)<a class="headerlink" href="#yahoo-finance-btcf-ibit-bito-btc-usd" title="Permanent link">&para;</a></h3>
+<ul>
+<li>1-minute bars for the last 30 days only (≤ 7 days per request), 5m → 60 d, 1h → 2 y. Free, unofficial.</li>
+</ul>
+<h2 id="aggregator-api-providers">Aggregator / API providers<a class="headerlink" href="#aggregator-api-providers" title="Permanent link">&para;</a></h2>
+<p>Almost nothing free goes below 1-minute bars. Verified 2026-09-12.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Best free granularity / depth</th>
+<th>Cost beyond free</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Coin Metrics Community</strong></td>
+<td><strong>1 s</strong> and 1 m <code>ReferenceRateUSD</code> — but only a <strong>rolling 7 days</strong>; daily since 2010. Market-level candles/trades/books are 403 on community</td>
+<td>sales quote</td>
+<td>run a daily collector if you want their 1 s rate</td>
+</tr>
+<tr>
+<td><strong>Alpaca crypto</strong></td>
+<td>1 m bars from 2021, tick trades from 2021, L1 quotes from 2023-03 — <strong>Alpaca's own thin venue</strong> (~1k trades/day now), no key needed</td>
+<td>$99/mo (irrelevant)</td>
+<td>not a proxy for market-wide microstructure</td>
+</tr>
+<tr>
+<td><strong>CryptoDataDownload</strong></td>
+<td>Binance BTCUSDT <strong>1 m OHLCV</strong> per-year CSVs 2019-09 → now, plain GET (<code>…/cdd/Binance_BTCUSDT_2026_minute.csv</code>)</td>
+<td>tick trade prints on "Plus+"</td>
+<td>fine for 1 m history; klines archive is better</td>
+</tr>
+<tr>
+<td><strong>Polygon.io → Massive</strong></td>
+<td>1 m aggregates, 2 y history, 5 calls/min, 15 min delayed</td>
+<td><strong>Currencies Starter $49/mo</strong>: second aggs, trades, quotes, flat files, 10+ y</td>
+<td>cheapest paid route to tick trades + L1 quotes across venues</td>
+</tr>
+<tr>
+<td><strong>Twelve Data</strong></td>
+<td>1 m OHLC labelled "Binance", deep history, 800 calls/day × 5,000 rows</td>
+<td>$79/mo</td>
+<td>ok for 1 m backfill</td>
+</tr>
+<tr>
+<td><strong>CoinGecko</strong></td>
+<td>5 m only for the last 24 h; hourly ≤ 90 d; daily; 365 d cap without key</td>
+<td>$129/mo; 1 m is enterprise-only</td>
+<td>not useful</td>
+</tr>
+<tr>
+<td><strong>CoinMarketCap</strong></td>
+<td>5 m intraday for 1 month, daily 1 y</td>
+<td>$29–79/mo</td>
+<td>not useful</td>
+</tr>
+<tr>
+<td><strong>CoinDesk Data (ex-CryptoCompare)</strong></td>
+<td><strong>free tier retired 2026-05-21</strong> — all endpoints 401</td>
+<td>sales only</td>
+<td>dead for us</td>
+</tr>
+<tr>
+<td><strong>Messari · Bitquery · Glassnode</strong></td>
+<td>hourly/daily; Bitquery free = 7-day trial; Glassnode free = web only</td>
+<td>$39–999/mo</td>
+<td>not useful</td>
+</tr>
+<tr>
+<td><strong>Yahoo</strong></td>
+<td>1 m for 7 days</td>
+<td>—</td>
+<td>spot checks only</td>
+</tr>
+<tr>
+<td><strong>Bitcoinity</strong></td>
+<td>1 m only for <code>timespan=24h</code>; daily back to 2011</td>
+<td>—</td>
+<td>history only</td>
+</tr>
+<tr>
+<td>Nomics · Cryptowatch · Finnhub crypto candles</td>
+<td>dead / dead / premium-only</td>
+<td>—</td>
+<td>skip</td>
+</tr>
+</tbody>
+</table>
+<h2 id="at-a-glance">At a glance<a class="headerlink" href="#at-a-glance" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>L1 granularity</th>
+<th>Coverage</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binance archives</td>
+<td>tick</td>
+<td>2023-05-16 → 2024-03-30</td>
+<td>free</td>
+</tr>
+<tr>
+<td><code>record_bookticker.py</code></td>
+<td>tick</td>
+<td>from start</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Tardis free days</td>
+<td>tick</td>
+<td>1st of month, 2019-11 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Tardis trial</td>
+<td>tick</td>
+<td>random 7–14 recent days</td>
+<td>free</td>
+</tr>
+<tr>
+<td>CryptoHFTData</td>
+<td>L2 diffs, 100 → 52 → 26 ms over 2025–26 (L1 via replay)</td>
+<td>2025-06-28 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Crypto Lake</td>
+<td>100 ms (tick via deltas)</td>
+<td>2022-11-14 →</td>
+<td>$64 one month</td>
+</tr>
+<tr>
+<td>CoinAPI</td>
+<td>100–250 ms → tick (2025?)</td>
+<td>~2019 →</td>
+<td>~$35–40 / per GiB</td>
+</tr>
+<tr>
+<td>Tardis paid</td>
+<td>tick</td>
+<td>2019-11-17 →</td>
+<td>$350–700 / mo</td>
+</tr>
+<tr>
+<td>Kaiko et al.</td>
+<td>tick</td>
+<td>long</td>
+<td>$9.5k+ / yr</td>
+</tr>
+<tr>
+<td>Polymarket RTDS</td>
+<td>1 s (settlement TWAP)</td>
+<td>live only</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Polymarket Gamma / Data API</td>
+<td>market metadata, resolutions, tick fills</td>
+<td>tick fills</td>
+<td>≥ 270 d (fills), full (metadata)</td>
+</tr>
+<tr>
+<td>Polymarket CLOB prices-history</td>
+<td>outcome prices</td>
+<td>~60 s</td>
+<td>2025-09 →</td>
+</tr>
+<tr>
+<td>Polygon V2 OrderFilled logs (Tenderly)</td>
+<td>every fill</td>
+<td>tick</td>
+<td>2026-04 →</td>
+</tr>
+<tr>
+<td>PMData Polymarket L2</td>
+<td>every book update, 5m/15m/1h</td>
+<td>tick</td>
+<td>2026-02 →</td>
+</tr>
+<tr>
+<td>PredictionTicks</td>
+<td>BTC 5m books + ticks</td>
+<td>~1.5 s</td>
+<td>2026-02 → 2026-08</td>
+</tr>
+<tr>
+<td>HF Polymarket dumps (kachoio, BrockMisner)</td>
+<td>1 s BBO / 10 s 10-level</td>
+<td>1–10 s</td>
+<td>Jan–May 2026</td>
+</tr>
+<tr>
+<td>PMData</td>
+<td>1 s (settlement TWAP)</td>
+<td>2026-02 →</td>
+<td>$49 / mo</td>
+</tr>
+<tr>
+<td>Chainlink Data Streams</td>
+<td>1 s</td>
+<td>2024-03-19 →</td>
+<td>$150 / mo</td>
+</tr>
+<tr>
+<td>Polygon on-chain feed</td>
+<td>~30 s</td>
+<td>2020-10 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Chainlink on BNB</td>
+<td>~31 s</td>
+<td>since deploy</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Gate.io L2 archives (perp + spot)</td>
+<td>100 ms snapshot + diffs</td>
+<td>2021-08 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Bybit L2 archives</td>
+<td>~100 ms, 500/200 levels</td>
+<td>2023-01 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>OKX 400-lv L2 archives</td>
+<td>~10 ms updates</td>
+<td>2023-03 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>BitMEX L1 quotes</td>
+<td>tick</td>
+<td>2014-11 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Bybit / OKX / Gate / KuCoin / HTX / Bitget trades</td>
+<td>tick</td>
+<td>2018–2023 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Aevo index-history</td>
+<td>1 s spot composite</td>
+<td>2023-09 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Coin Metrics community</td>
+<td>1 s reference rate, rolling 7 d</td>
+<td>7 days</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Coinbase / Kraken REST</td>
+<td>tick trades (spot)</td>
+<td>2015 →</td>
+<td>free</td>
+</tr>
+<tr>
+<td>Hyperliquid S3</td>
+<td>~550 ms L2 snapshots, tick fills</td>
+<td>2023 →</td>
+<td>~$30 / yr egress</td>
+</tr>
+<tr>
+<td>Databento CME (BTC/MBT)</td>
+<td>MBP-1, trades, ns</td>
+<td>2017 →</td>
+<td>$125 free credits, then $179+/mo</td>
+</tr>
+<tr>
+<td>Databento CME ES</td>
+<td>ohlcv-1s, trades, tbbo, mbp-1, mbo</td>
+<td>2010 →</td>
+<td>same credit; ~1.2 GB/yr for 1s bars</td>
+</tr>
+<tr>
+<td>Yahoo ES=F</td>
+<td>1 m bars</td>
+<td>last 8 days</td>
+<td>free</td>
+</tr>
+<tr>
+<td>FirstRate Data ES</td>
+<td>1 m bars</td>
+<td>2008 →</td>
+<td>one-off, price not shown</td>
+</tr>
+<tr>
+<td>Massive futures</td>
+<td>1 s aggs, trades, quotes</td>
+<td>?</td>
+<td>EOD free; $29+/mo</td>
+</tr>
+<tr>
+<td>Massive (ex-Polygon.io)</td>
+<td>second aggs, trades, quotes</td>
+<td>10+ y</td>
+<td>$49 / mo</td>
+</tr>
+<tr>
+<td>Pyth</td>
+<td>400 ms</td>
+<td>full</td>
+<td>$500 / mo — no</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

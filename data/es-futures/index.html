@@ -1,0 +1,1747 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Binance BTC market-data tooling — historical klines and L1 order book">
+      
+      
+      
+        <link rel="canonical" href="https://jfry03.github.io/btc/data/es-futures/">
+      
+      
+        <link rel="prev" href="../cryptohft/">
+      
+      
+        <link rel="next" href="../../reference/load/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ES futures (CME) - btc</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#es-futures-cme-e-mini-sp-500" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="btc" class="md-header__button md-logo" aria-label="btc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            btc
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ES futures (CME)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jfry03/btc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jfry03/btc
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="btc" class="md-nav__button md-logo" aria-label="btc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    btc
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jfry03/btc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jfry03/btc
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data collection
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data collection
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading (any source)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../klines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Klines (OHLCV)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: historical
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../record-bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: live recorder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tardis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: Tardis free days
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: compaction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../market-hours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Market hours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cryptohft/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L1 book: CryptoHFTData replay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES futures (CME)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES futures (CME)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sources-compared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources compared
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sources compared">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#databento-concretely" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Databento, concretely
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-a-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting a key
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output columns
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trading-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trading hours
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-planned-pull-es-best-bidask-every-second" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The planned pull: ES best bid/ask every second
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spend-ledger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spend ledger
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-was-pulled-2026-09-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What was pulled (2026-09-12)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/load/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.load
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.bookticker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/backfill_l1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.backfill_l1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cryptohft/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.cryptohft
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/klines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.klines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/record-bookticker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.record_bookticker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/tardis-free-days/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.tardis_free_days
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/compact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.compact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/status_site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.status_site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/market_hours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.market_hours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/es_futures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data_collection.es_futures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/vps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPS deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/data-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data sources survey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/sources-and-costs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sources & costs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/binance-quirks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Binance data quirks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Source cross-validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sources-compared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources compared
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sources compared">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#databento-concretely" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Databento, concretely
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-a-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting a key
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output columns
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trading-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trading hours
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-planned-pull-es-best-bidask-every-second" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The planned pull: ES best bid/ask every second
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spend-ledger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spend ledger
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-was-pulled-2026-09-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What was pulled (2026-09-12)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="es-futures-cme-e-mini-sp-500">ES futures (CME E-mini S&amp;P 500)<a class="headerlink" href="#es-futures-cme-e-mini-sp-500" title="Permanent link">&para;</a></h1>
+<p><strong>Source:</strong> <code>data_collection/es_futures.py</code>
+<strong>Output:</strong> <code>data/parquet/es/&lt;symbol&gt;_&lt;schema&gt;_&lt;start&gt;_&lt;end&gt;.parquet</code> (Databento) or <code>yahoo_ESF_1m_&lt;date&gt;.parquet</code></p>
+<p>There is no free per-second ES history anywhere; the cheapest self-serve path is <strong>Databento</strong>
+(metered per GB, $125 of free credit on signup). Everything else free is 1-minute bars with a
+short lookback or daily data. Surveyed 2026-09-12.</p>
+<h2 id="sources-compared">Sources compared<a class="headerlink" href="#sources-compared" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Resolution</th>
+<th>Coverage</th>
+<th>Cost</th>
+<th>Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Databento <code>GLBX.MDP3</code></strong></td>
+<td><code>ohlcv-1s</code>, <code>ohlcv-1m</code>, <code>trades</code>, <code>tbbo</code> (trade + BBO), <code>mbp-1</code> (every L1 change), <code>mbp-10</code>, <code>mbo</code> (full order-by-order), ns timestamps</td>
+<td>ES from <strong>2010-06</strong> (all CME Globex); also BTC / MBT futures in the same dataset</td>
+<td>metered per GB (rates visible only after login via <code>metadata.list_unit_prices</code>; free to query cost); <strong>$125 free credit</strong>; Standard plan $179–199/mo (historical only), Plus $1,399/mo, Unlimited $3,500/mo</td>
+<td>plans/credits from Databento's blog and third-party comparisons; per-GB rates <strong>not</strong> public</td>
+</tr>
+<tr>
+<td><strong>Yahoo Finance <code>ES=F</code></strong></td>
+<td>1m (<strong>last 8 days only</strong>, error beyond), 5m → 60 d, 1h → 2 y, 1d → decades</td>
+<td>rolling</td>
+<td>free, no key, unofficial</td>
+<td>yes — 8,877 bars pulled</td>
+</tr>
+<tr>
+<td><strong>FirstRate Data</strong></td>
+<td>1-minute (+5m/30m/1h/1d), continuous + individual contracts, three roll adjustments</td>
+<td><strong>2008-01 →</strong>, updated daily</td>
+<td>one-off purchase (price not shown on page; ES futures bundles are typically tens of dollars — unverified), $99.95/yr for updates</td>
+<td>page verified, price not</td>
+</tr>
+<tr>
+<td><strong>Massive (ex-Polygon.io) futures</strong></td>
+<td>1 s aggregates via REST, tick trades and top-of-book quotes via WebSocket and daily flat files</td>
+<td>not stated</td>
+<td>Basic free = end-of-day only; Starter $29/mo (15-min delayed), Developer $79, Advanced $199; futures billed separately from other asset classes</td>
+<td>blog verified; history depth and whether flat files are on Starter unverified</td>
+</tr>
+<tr>
+<td><strong>Kaggle <code>choweric/cme-es</code></strong></td>
+<td>daily OHLC/volume/OI per contract</td>
+<td>2000 → 2022</td>
+<td>free</td>
+<td>listing only</td>
+</tr>
+<tr>
+<td><strong>Kibot</strong></td>
+<td>1-min / tick ES (paid); API needs login</td>
+<td>2009 →</td>
+<td>paid, price not checked</td>
+<td>401 without login</td>
+</tr>
+<tr>
+<td>Barchart Premier, PortaraCQG, TickData, backtest-market, pitrading</td>
+<td>1-min to tick</td>
+<td>10+ y</td>
+<td>subscription / one-off, ≥ $50</td>
+<td>not checked</td>
+</tr>
+<tr>
+<td>CME DataMine</td>
+<td>full depth</td>
+<td>—</td>
+<td>enterprise</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<h3 id="databento-concretely">Databento, concretely<a class="headerlink" href="#databento-concretely" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Schemas for ES: <code>ohlcv-1s</code> is the cheapest per-second series; <code>tbbo</code> gives every trade with the
+  BBO at that instant (much smaller than <code>mbp-1</code>, which is every top-of-book change and can be
+  ~10⁷ records/day on ES); <code>trades</code> is every fill.</li>
+<li>Continuous symbology (<code>stype_in="continuous"</code>): <code>ES.c.0</code> front month by <strong>calendar</strong> roll,
+  <code>ES.n.0</code> by open interest, <code>ES.v.0</code> by volume; <code>ES.c.1</code> is the next contract. Outrights like
+  <code>ESZ5</code> use <code>raw_symbol</code>. Continuous series are <em>not</em> back-adjusted — do that yourself if needed.</li>
+<li><strong>Approximate data sizes</strong> (DBN record sizes × typical ES activity; estimate, not verified):
+  <code>ohlcv-1s</code> ≈ 5 MB/day → <strong>~1.2 GB/year</strong>; <code>trades</code> ≈ 50–150 MB/day → ~25 GB/year;
+  <code>tbbo</code> ≈ 100–200 MB/day → ~40 GB/year; <code>mbp-1</code> ≈ 0.5–1.5 GB/day → hundreds of GB/year.
+  Cost = size × the schema's $/GB, so a year of <code>ohlcv-1s</code> is almost certainly well inside the
+  $125 credit; a year of trades or tbbo may or may not be — <strong>always run <code>--dry-run</code> first</strong>.</li>
+<li>BTC/MBT (CME Bitcoin futures) live in the same dataset with the same schemas (BTC from 2017-12,
+  MBT from 2021-04), so the same script fetches them: <code>--symbol BTC.c.0</code>.</li>
+</ul>
+<h2 id="getting-a-key">Getting a key<a class="headerlink" href="#getting-a-key" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Sign up at <a href="https://databento.com">https://databento.com</a> (no card needed for the free credit), create an API key in
+   the portal (Keys page).</li>
+<li><code>export DATABENTO_API_KEY=db-…</code> in the shell (never commit it; the script only reads the env var).</li>
+<li><code>python -m data_collection.es_futures --prices</code> prints the $/GB table for every schema so you
+   can size a pull; <code>--dry-run</code> prints the exact cost of a request via <code>metadata.get_cost</code>
+   (free) before anything is spent.</li>
+</ol>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--yahoo<span class="w">                              </span><span class="c1"># no key: ES=F 1m, last 8 days</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--dry-run<span class="w">                            </span><span class="c1"># cost of ES.c.0 ohlcv-1s, last 8 days</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--schema<span class="w"> </span>ohlcv-1s<span class="w"> </span>--start<span class="w"> </span><span class="m">2025</span>-09-01<span class="w"> </span>--end<span class="w"> </span><span class="m">2026</span>-09-01<span class="w"> </span>--dry-run
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--schema<span class="w"> </span>ohlcv-1s<span class="w"> </span>--start<span class="w"> </span><span class="m">2025</span>-09-01<span class="w"> </span>--end<span class="w"> </span><span class="m">2026</span>-09-01<span class="w"> </span>--yes
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--symbol<span class="w"> </span>BTC.c.0<span class="w"> </span>--schema<span class="w"> </span>tbbo<span class="w"> </span>--start<span class="w"> </span><span class="m">2026</span>-09-01<span class="w"> </span>--end<span class="w"> </span><span class="m">2026</span>-09-08<span class="w"> </span>--dry-run
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">data_collection</span><span class="w"> </span><span class="kn">import</span> <span class="n">es_futures</span> <span class="k">as</span> <span class="n">es</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">es</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="s2">"ES.c.0"</span><span class="p">,</span> <span class="s2">"tbbo"</span><span class="p">,</span> <span class="s2">"2026-09-01"</span><span class="p">,</span> <span class="s2">"2026-09-08"</span><span class="p">)</span>      <span class="c1"># {'usd': …, 'gb': …, 'records': …}</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">path</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">"ES.c.0"</span><span class="p">,</span> <span class="s2">"ohlcv-1s"</span><span class="p">,</span> <span class="s2">"2026-09-01"</span><span class="p">,</span> <span class="s2">"2026-09-08"</span><span class="p">)</span>
+</code></pre></div>
+<p>The CLI refuses to spend without <code>--yes</code>. For multi-GB pulls use Databento's batch API
+(<code>client.batch.submit_job</code>) rather than <code>get_range</code>; the script's <code>fetch</code> is meant for pulls up to
+a few GB.</p>
+<h2 id="output-columns">Output columns<a class="headerlink" href="#output-columns" title="Permanent link">&para;</a></h2>
+<p>Databento's native DataFrame: index <code>ts_event</code> (UTC, ns), <code>rtype</code>, <code>publisher_id</code>, <code>instrument_id</code>,
+<code>symbol</code>, then per schema — <code>ohlcv-*</code>: <code>open, high, low, close, volume</code>; <code>trades</code>/<code>tbbo</code>: <code>price,
+size, side, action, flags, depth, ts_recv, sequence</code> (+ <code>bid_px_00, ask_px_00, bid_sz_00, ask_sz_00</code>
+for tbbo/mbp-1). Prices are already scaled to floats. Yahoo: <code>open, high, low, close, volume</code>
+indexed by UTC minute.</p>
+<h2 id="trading-hours">Trading hours<a class="headerlink" href="#trading-hours" title="Permanent link">&para;</a></h2>
+<p>ES trades on CME Globex Sunday 18:00 → Friday 17:00 ET with a daily 17:00–18:00 ET maintenance
+halt; the cash-session hours (09:30–16:00 ET) are when it is most liquid. See <a href="../market-hours/">Market hours</a>
+for the helpers that compute open/closed for CME and the other venues.</p>
+<h2 id="the-planned-pull-es-best-bidask-every-second">The planned pull: ES best bid/ask every second<a class="headerlink" href="#the-planned-pull-es-best-bidask-every-second" title="Permanent link">&para;</a></h2>
+<p><code>scripts/pull_es_bbo.sh</code> prices (and with <code>--yes</code>, buys) <code>ES.c.0</code> <code>bbo-1s</code> from 2021-11-01 to
+2026-09-12 in yearly chunks — <strong>$119.02 for 7.1 GB / 88.7M rows</strong> at the rates seen on
+2026-09-12 (<code>bbo-1s</code> = $18/GB), i.e. inside the $125 signup credit with a small buffer. Each
+row is one second of the Globex session with <code>bid_px_00, ask_px_00, bid_sz_00, ask_sz_00,
+bid_ct_00, ask_ct_00</code> (top of book and order counts) plus the last trade's <code>price, size, side</code>.
+Chunks land in <code>data/parquet/es/ES_c_0_bbo-1s_&lt;start&gt;_&lt;end&gt;.parquet</code>; existing chunks are skipped,
+so the script is resumable, and it refuses to execute if the remaining cost exceeds <code>--budget</code>.</p>
+<p>Why <code>bbo-1s</code> rather than <code>ohlcv-1s</code>: it carries size on each side (the candle doesn't), and it's
+cheaper ($18 vs $70 per GB; $25 vs $44 per year for ES). <code>tbbo</code>/<code>mbp-1</code> (every change) cost
+$146–$240+ per year and don't fit the credit.</p>
+<p>Caveats: <code>ES.c.0</code> rolls by calendar, so around each quarterly expiry the series jumps between
+contracts — compute returns within a <code>symbol</code>, not across. Databento's credit balance is not
+queryable via API; check the portal before running with <code>--yes</code>. Prices are for the
+<code>historical</code> mode; run <code>--prices</code> to re-check.</p>
+<h2 id="spend-ledger">Spend ledger<a class="headerlink" href="#spend-ledger" title="Permanent link">&para;</a></h2>
+<p>Databento's API has no balance endpoint (verified: nothing in <code>metadata.*</code>, and the obvious
+unlisted paths 404), and overage is billed to the card on file rather than blocked, so the module
+keeps its own ledger at <code>data/parquet/es/databento_ledger.json</code>: total credit plus one entry per
+purchase with the exact quoted cost. Every buy — plan chunks and single pulls — is refused if it
+would exceed the ledger's remaining credit, and plan chunks re-check before each one.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--balance<span class="w">     </span><span class="c1"># credit / spent / remaining, with purchase list</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>python<span class="w"> </span>-m<span class="w"> </span>data_collection.es_futures<span class="w"> </span>--credit<span class="w"> </span><span class="m">200</span><span class="w">  </span><span class="c1"># set total credit (after a top-up, or minus anything bought outside)</span>
+</code></pre></div>
+<p>It only knows about purchases made through this module; seed it with <code>--credit</code> if you buy
+anything in the portal. The signup credit expires six months after account creation.</p>
+<h2 id="what-was-pulled-2026-09-12">What was pulled (2026-09-12)<a class="headerlink" href="#what-was-pulled-2026-09-12" title="Permanent link">&para;</a></h2>
+<p><code>ES.c.0</code> <code>bbo-1s</code> 2021-11-01 → 2026-09-12: <strong>88,748,062 rows, 1.75 GB</strong> in five yearly Parquets,
+$119.02 of the credit. Load with <code>es_futures.load_bbo(start, end)</code>, which concatenates the chunks
+and adds <code>mid</code>, <code>spread</code> and a <code>roll</code> flag (the <code>symbol</code> column is the continuous alias <code>ES.c.0</code>
+for every row; contract changes are detected from <code>instrument_id</code>). Databento flagged
+2021-12-05 and 2022-01-02 as degraded-quality days.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

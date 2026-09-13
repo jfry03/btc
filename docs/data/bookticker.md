@@ -123,6 +123,15 @@ CSV decompression, not by the sampling.
 - Up to 5 attempts with linear backoff on connection errors. A 404 returns `None`.
 - `MAX_DL_WORKERS = 3` for `prefetch`; files are large and the host is shared.
 
+### Backfilling the whole archive
+
+```bash
+nohup python -m data_collection.backfill_l1 --start 2023-05-16 --end 2024-04-01 > data/raw/backfill-l1.log 2>&1 &
+```
+
+Downloads each day's zip one day ahead of compaction, compacts it to Parquet, deletes the zip.
+~13 s/day for 2023 files, 1–2 min for busy 2024 days; ~40 GB total. Resumable.
+
 ### Other sources of historical Binance L1
 
 Nothing else free and complete exists for the perp after 2024-03-30, but these fill parts of the
@@ -134,7 +143,7 @@ top-of-book read off the throttled depth stream rather than the native tick feed
 |---|---|---|---|---|
 | Tardis.dev `book_ticker` — free days | tick | 1st of each month, 2019-11 → | free | yes, via `tardis_free_days` |
 | Tardis.dev 30-day trial | tick | random 7–14 recent days | free, no card | same file format — drop into `data/raw/tardis/` |
-| CryptoHFTData | ~26 ms L2 diffs, L1 via replay | 2025-06-28 → | free | not yet (needs an L2 → L1 replay step; no snapshots, so warm up from empty) |
+| CryptoHFTData | L2 diffs (100 → 52 → 26 ms over 2025–26), L1 via replay | 2025-06-28 → | free | yes — `cryptohft` module (`source="hft"`); prices match 98 %, sizes only ~55 % |
 | Crypto Lake `level_1` / `book_delta_v2` | 100 ms / tick | 2022-11-14 → | $64 one month | not yet (columns `origin_time, received_time, bid_0_price…`) |
 | CoinAPI `T-QUOTES` flat files | 100–250 ms, tick after a 2025 cutover | ~2019 → | per GiB, ≈ $35–40 for the gap | not yet |
 | Tardis.dev paid | tick | 2019-11-17 → | $350+/mo | same as free days |

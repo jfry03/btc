@@ -38,10 +38,11 @@ Prices checked 2026-09-12. Budget target: free, or a one-off < $50.
   `event_time`/`transaction_time` (ms), `first/final/prev_final_update_id`, `side`, `price`,
   `quantity` (strings; `0` = level removed).
 - **Coverage:** **2025-06-28 → now**, ~15 min behind live.
-- **Granularity (verified on 2026-09-01):** one diff event every **~26 ms** (p10–p90 26–28 ms),
-  ~43 level changes per event, update-id chain **unbroken** within the hour. Finer than the 100 ms
-  depth-derived products, but changes inside a 26 ms window are collapsed — not per-change like
-  `bookTicker`. **No snapshots** in the files (only `event_type = update`), so replay from an empty
+- **Granularity (verified):** diff events every **~100 ms in mid-2025, ~52 ms from Oct 2025,
+  ~26 ms by Sep 2026** (p10–p90 26–28 ms on 2026-09-01), ~43 level changes per event, update-id
+  chain **unbroken** within the hour. Changes inside an event window are collapsed — not per-change
+  like `bookTicker`. Replayed L1 prices match the native feed 98 % of seconds; **quantities only
+  ~55 %** (see [validation](validation.md)). **No snapshots** in the files (only `event_type = update`), so replay from an empty
   book: fine for L1 after a few seconds' warm-up (the top of book is touched constantly), not for
   deep levels.
 - **Cost:** free anonymous download (60 req/min; URL 302s to Cloudflare R2, use `curl -L`);
@@ -229,6 +230,18 @@ Polymarket keeps none. Third parties:
 - **Cost:** per-GB, prices only visible after login; **$125 free credits** on signup (6 months) —
   one front-month contract's trades/MBP-1 is MB/day, so a year should fit; Standard plan $179–199/mo.
 
+### ES (E-mini S&P 500) futures — see [ES futures](../data/es-futures.md)
+- **Databento `GLBX.MDP3`** is the only self-serve per-second-or-finer source: `ohlcv-1s`,
+  `trades`, `tbbo`, `mbp-1`, `mbo` for ES from 2010-06 (same dataset and script as BTC/MBT).
+  Metered per GB — rates visible only with a key — **$125 free credit**; a year of `ohlcv-1s`
+  is ~1.2 GB (estimate) and should fit, trades/BBO may not. `data_collection/es_futures.py`
+  costs every request before spending.
+- **Yahoo `ES=F`**: free 1-minute bars, last 8 days only (verified); 5m → 60 d; 1h → 2 y.
+- **FirstRate Data**: 1-minute ES from 2008, one-off purchase (price not published on the page).
+- **Massive (ex-Polygon.io)**: 1 s aggregates, trades, quotes, flat files for CME futures —
+  free tier is end-of-day only, Starter $29/mo delayed; history depth unverified.
+- Kaggle `choweric/cme-es`: daily per-contract OHLC/OI 2000–2022, free.
+
 ### Coinbase · Kraken spot
 - **Coinbase Exchange** REST: every BTC-USD trade since **2015-01** (trade_id 1), 1000/page with
   `cb-after` cursor, free, no key. ~1.1B trades total.
@@ -264,7 +277,7 @@ Almost nothing free goes below 1-minute bars. Verified 2026-09-12.
 | `record_bookticker.py` | tick | from start | free |
 | Tardis free days | tick | 1st of month, 2019-11 → | free |
 | Tardis trial | tick | random 7–14 recent days | free |
-| CryptoHFTData | ~26 ms L2 diffs (L1 via replay) | 2025-06-28 → | free |
+| CryptoHFTData | L2 diffs, 100 → 52 → 26 ms over 2025–26 (L1 via replay) | 2025-06-28 → | free |
 | Crypto Lake | 100 ms (tick via deltas) | 2022-11-14 → | $64 one month |
 | CoinAPI | 100–250 ms → tick (2025?) | ~2019 → | ~$35–40 / per GiB |
 | Tardis paid | tick | 2019-11-17 → | $350–700 / mo |
@@ -290,5 +303,9 @@ Almost nothing free goes below 1-minute bars. Verified 2026-09-12.
 | Coinbase / Kraken REST | tick trades (spot) | 2015 → | free |
 | Hyperliquid S3 | ~550 ms L2 snapshots, tick fills | 2023 → | ~$30 / yr egress |
 | Databento CME (BTC/MBT) | MBP-1, trades, ns | 2017 → | $125 free credits, then $179+/mo |
+| Databento CME ES | ohlcv-1s, trades, tbbo, mbp-1, mbo | 2010 → | same credit; ~1.2 GB/yr for 1s bars |
+| Yahoo ES=F | 1 m bars | last 8 days | free |
+| FirstRate Data ES | 1 m bars | 2008 → | one-off, price not shown |
+| Massive futures | 1 s aggs, trades, quotes | ? | EOD free; $29+/mo |
 | Massive (ex-Polygon.io) | second aggs, trades, quotes | 10+ y | $49 / mo |
 | Pyth | 400 ms | full | $500 / mo — no |

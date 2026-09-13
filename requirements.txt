@@ -17,3 +17,6 @@ jupyter
 ipykernel
 requests
 websockets
+exchange_calendars
+pytest
+databento

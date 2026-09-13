@@ -1,5 +1,6 @@
 """
-Compact a closed day of recorder output (.csv.gz) into a much smaller Parquet file.
+Compact a closed day of recorder output (.csv.gz) or a Binance bookTicker archive (.zip) into a
+much smaller Parquet file.
 
 Prices and quantities are stored as integers in their native tick (e.g. 0.1 USDT, 0.001 BTC),
 which lets Parquet's DELTA_BINARY_PACKED encoding + zstd get ~3x smaller than gzip CSV
@@ -16,7 +17,6 @@ row count and first/last rows compared with the source. Runs in a bounded ~200 M
 from __future__ import annotations
 
 import argparse
-import gzip
 import logging
 import os
 import re
@@ -31,16 +31,15 @@ import pyarrow.parquet as pq
 RAW_DIR = Path("data/raw")
 FLOAT_COLS = ["best_bid_price", "best_bid_qty", "best_ask_price", "best_ask_qty"]
 BATCH_BYTES = 32 << 20
-FILE_RE = re.compile(r"^(?P<symbol>[A-Z0-9_]+)-bookTicker-(?P<day>\d{4}-\d{2}-\d{2})\.csv\.gz$")
+FILE_RE = re.compile(r"^(?P<symbol>[A-Z0-9_]+)-bookTicker-(?P<day>\d{4}-\d{2}-\d{2})\.(csv\.gz|zip)$")
 
 log = logging.getLogger("compact")
 
 
 def _batches(path: Path):
-    with gzip.open(path, "rb") as fh:
-        for b in pcsv.open_csv(fh, read_options=pcsv.ReadOptions(block_size=BATCH_BYTES)):
-            if b.num_rows:
-                yield b
+    """Recorder .csv.gz or Binance archive .zip, streamed."""
+    from .bookticker import iter_batches
+    yield from iter_batches(path, block_size=BATCH_BYTES)
 
 
 def _scale_for(col: pa.Array, current: int) -> int:
@@ -74,15 +73,21 @@ def _encode(b: pa.RecordBatch, scales: dict[str, int]) -> pa.RecordBatch:
 
 
 def compact_file(src: Path, keep_source: bool = False) -> Path:
-    dst = src.with_name(src.name.replace(".csv.gz", ".parquet"))
+    dst = src.with_name(FILE_RE.match(src.name).expand(r"\g<symbol>-bookTicker-\g<day>.parquet")
+                        if FILE_RE.match(src.name) else src.name.replace(".csv.gz", ".parquet"))
     tmp = dst.with_suffix(".parquet.part")
     scales = find_scales(src)
     log.info("%s scales=%s", src.name, scales)
 
     n_rows, first, last = 0, None, None
     writer = None
+    ordered, prev_t = True, None
     for b in _batches(src):
         enc = _encode(b, scales)
+        t = enc.column("transaction_time").to_numpy()
+        if (prev_t is not None and t[0] < prev_t) or (len(t) > 1 and (t[1:] < t[:-1]).any()):
+            ordered = False
+        prev_t = t[-1]
         if writer is None:
             meta = {f"scale:{c}": str(k) for c, k in scales.items()}
             meta["source"] = src.name
@@ -96,6 +101,13 @@ def compact_file(src: Path, keep_source: bool = False) -> Path:
     if writer is None:
         raise ValueError(f"{src.name} is empty")
     writer.close()
+
+    if not ordered:
+        # Some Binance archive days (e.g. 2023-11-21 .. 2024-01-02) interleave two time-ordered
+        # streams, so rows are not in time order. sample_book's one-pass as-of logic needs
+        # monotonic time, so sort by update_id (the engine's sequence) and rewrite.
+        log.warning("%s: rows not in time order - sorting by update_id", src.name)
+        first, last = _sort_parquet(tmp)
 
     # verify: re-read, compare count and boundary rows (decoded back to floats)
     pf = pq.ParquetFile(tmp)
@@ -117,6 +129,42 @@ def compact_file(src: Path, keep_source: bool = False) -> Path:
     return dst
 
 
+def _sort_parquet(path: Path) -> tuple[dict, dict]:
+    """Sort a compacted file by update_id in place (needs ~60 bytes/row of RAM: ~2.5 GB for a
+    40M-row day). Returns decoded (first, last) rows for the verification step."""
+    tbl = pq.read_table(path)
+    meta = tbl.schema.metadata
+    tbl = tbl.sort_by("update_id").replace_schema_metadata(meta)
+    tmp2 = path.with_suffix(".sorted")
+    pq.write_table(tbl, tmp2, compression="zstd", compression_level=9, use_dictionary=False,
+                   column_encoding="DELTA_BINARY_PACKED", data_page_version="2.0")
+    os.replace(tmp2, path)
+    dec = decode(tbl)
+    return dec.slice(0, 1).to_pylist()[0], dec.slice(tbl.num_rows - 1, 1).to_pylist()[0]
+
+
+def is_time_ordered(path: Path) -> bool:
+    prev = None
+    for b in pq.ParquetFile(path).iter_batches(batch_size=1_000_000, columns=["transaction_time"]):
+        t = b.column(0).to_numpy()
+        if (prev is not None and t[0] < prev) or (len(t) > 1 and (t[1:] < t[:-1]).any()):
+            return False
+        prev = t[-1]
+    return True
+
+
+def resort(files: list[Path]) -> None:
+    """Fix already-compacted files whose rows are out of time order."""
+    for f in files:
+        if is_time_ordered(f):
+            log.info("%s: already ordered", f.name); continue
+        n = pq.read_metadata(f).num_rows
+        log.warning("%s: not time-ordered - sorting %d rows by update_id", f.name, n)
+        _sort_parquet(f)
+        assert is_time_ordered(f) and pq.read_metadata(f).num_rows == n
+        log.info("%s: sorted", f.name)
+
+
 def decode(tbl: pa.Table) -> pa.Table:
     """Parquet (int-scaled) -> archive layout with float prices/quantities."""
     meta = tbl.schema.metadata or {}
@@ -134,7 +182,7 @@ def closed_files(raw_dir: Path = RAW_DIR) -> list[Path]:
     """Recorder .csv.gz files for days strictly before today (UTC) - nothing is writing to them."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     out = []
-    for p in sorted(raw_dir.glob("*-bookTicker-*.csv.gz")):
+    for p in sorted(list(raw_dir.glob("*-bookTicker-*.csv.gz")) + list(raw_dir.glob("*-bookTicker-????-??-??.zip"))):
         m = FILE_RE.match(p.name)
         if m and m["day"] < today:
             out.append(p)
@@ -146,8 +194,12 @@ if __name__ == "__main__":
     ap.add_argument("files", nargs="*", type=Path, help="specific .csv.gz files (default: all closed days)")
     ap.add_argument("--raw-dir", type=Path, default=RAW_DIR)
     ap.add_argument("--keep-source", action="store_true")
+    ap.add_argument("--resort", action="store_true", help="sort the given (or all) compacted .parquet files by update_id if out of time order")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    if a.resort:
+        resort(a.files or sorted(a.raw_dir.glob("*-bookTicker-????-??-??.parquet")))
+        raise SystemExit(0)
     files = a.files or closed_files(a.raw_dir)
     if not files:
         log.info("nothing to compact")

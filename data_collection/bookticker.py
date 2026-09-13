@@ -11,6 +11,7 @@ package, so `sample_book` works over any day for which *some* source exists:
     data/raw/<SYMBOL>-bookTicker-<day>.csv.gz       record_bookticker (live recorder)
     data/raw/<SYMBOL>-bookTicker-<day>.parquet      compact (recorder output, compacted)
     data/raw/tardis/binance-futures_book_ticker_<day>_<SYMBOL>.csv.gz   tardis_free_days
+    data/raw/hft/<SYMBOL>-bookTicker-<day>.parquet  cryptohft (L2 replayed to L1, 26 ms events)
 
 Two public functions:
 
@@ -92,20 +93,62 @@ def download_archive(symbol: str, stamp: str, monthly: bool = False) -> Path | N
     return dest
 
 
-def fetch_day(symbol: str, day: date) -> tuple[Path, bool] | None:
-    """Locate the archive covering `day`: daily first, monthly fallback. Returns (path, is_monthly)."""
-    p = download_archive(symbol, day.strftime("%Y-%m-%d"), monthly=False)
-    if p is not None:
-        return p, False
-    p = download_archive(symbol, day.strftime("%Y-%m"), monthly=True)
-    if p is not None:
-        return p, True
-    for local in (RAW_DIR / f"{symbol}-bookTicker-{day:%Y-%m-%d}.parquet",
-                  RAW_DIR / f"{symbol}-bookTicker-{day:%Y-%m-%d}.csv.gz",
-                  TARDIS_DIR / f"binance-futures_book_ticker_{day:%Y-%m-%d}_{symbol}.csv.gz"):
-        if local.exists() and local.stat().st_size > 0:
-            return local, False
+SOURCES = ("archive", "recorder", "tardis", "hft")
+
+
+def _parquet_source(path: Path) -> str:
+    """'archive' or 'recorder' for a compacted parquet, from the `source` metadata compact wrote."""
+    try:
+        meta = pq.read_schema(path).metadata or {}
+        src = meta.get(b"source", b"").decode()
+    except Exception:  # noqa: BLE001
+        return "archive"
+    return "recorder" if src.endswith(".csv.gz") else "archive"
+
+
+def locate(symbol: str, day: date, source: str = "auto", download: bool = True) -> tuple[Path, bool, str] | None:
+    """
+    Find the file covering `day` and say where it came from. Returns (path, is_monthly, source).
+
+    source: "auto" (precedence: compacted archive/recorder parquet, recorder csv.gz, archive zip
+            on disk, tardis, hft, then download the Binance archive) or one of SOURCES to insist on a specific origin.
+    download: allow fetching the Binance archive when nothing is on disk.
+    """
+    day_s = f"{day:%Y-%m-%d}"
+    parquet = RAW_DIR / f"{symbol}-bookTicker-{day_s}.parquet"
+    csv_gz = RAW_DIR / f"{symbol}-bookTicker-{day_s}.csv.gz"
+    zip_d = RAW_DIR / f"{symbol}-bookTicker-{day_s}.zip"
+    tardis = TARDIS_DIR / f"binance-futures_book_ticker_{day_s}_{symbol}.csv.gz"
+    hft = RAW_DIR / "hft" / f"{symbol}-bookTicker-{day_s}.parquet"
+    ok = lambda p: p.exists() and p.stat().st_size > 0  # noqa: E731
+
+    if source in ("auto", "archive", "recorder") and ok(parquet):
+        origin = _parquet_source(parquet)
+        if source == "auto" or source == origin:
+            return parquet, False, origin
+    if source in ("auto", "recorder") and ok(csv_gz):
+        return csv_gz, False, "recorder"
+    if source in ("auto", "archive") and ok(zip_d):
+        return zip_d, False, "archive"
+    if source in ("auto", "tardis") and ok(tardis):
+        return tardis, False, "tardis"
+    if source in ("auto", "hft") and ok(hft):
+        return hft, False, "hft"
+    if source in ("auto", "archive"):
+        if download:
+            p = download_archive(symbol, day_s, monthly=False)
+            if p is not None:
+                return p, False, "archive"
+            p = download_archive(symbol, day.strftime("%Y-%m"), monthly=True)
+            if p is not None:
+                return p, True, "archive"
     return None
+
+
+def fetch_day(symbol: str, day: date, source: str = "auto") -> tuple[Path, bool] | None:
+    """Locate the file covering `day` (see `locate`). Returns (path, is_monthly)."""
+    found = locate(symbol, day, source)
+    return None if found is None else (found[0], found[1])
 
 
 def prefetch(symbol: str, start: date, end: date) -> None:
@@ -119,8 +162,10 @@ def prefetch(symbol: str, start: date, end: date) -> None:
 # --------------------------------------------------------------------------- streaming read
 
 def _tardis_to_archive(b: pa.RecordBatch) -> pa.RecordBatch:
-    """Tardis book_ticker/quotes columns -> archive layout. Tardis keeps only the exchange
-    event time (µs), so transaction_time is set equal to event_time and update_id is null."""
+    """Tardis book_ticker/quotes columns -> archive layout. Tardis `timestamp` (µs) is the
+    exchange *transaction* time - verified equal to Binance's `T` within 0-1 ms on 2024-03-01
+    (Binance's `E` runs ~6 ms later and is not available), so both time columns get it and
+    update_id is null."""
     ev = pcmp.cast(pcmp.divide(b.column("timestamp"), 1000), pa.int64())
     return pa.RecordBatch.from_arrays(
         [pa.nulls(b.num_rows, pa.int64()), b.column("bid_price"), b.column("bid_amount"),
@@ -152,9 +197,9 @@ def iter_batches(path: Path, block_size: int = 64 << 20) -> Iterator[pa.RecordBa
                 yield _tardis_to_archive(b) if tardis else b
 
 
-def iter_day(symbol: str, day: date) -> Iterator[pa.RecordBatch]:
+def iter_day(symbol: str, day: date, source: str = "auto") -> Iterator[pa.RecordBatch]:
     """Batches for one UTC day, whichever archive it lives in."""
-    found = fetch_day(symbol, day)
+    found = fetch_day(symbol, day, source)
     if found is None:
         return
     path, monthly = found
@@ -175,9 +220,9 @@ def iter_day(symbol: str, day: date) -> Iterator[pa.RecordBatch]:
             yield b.slice(lo, hi - lo)
 
 
-def load_bookticker(symbol: str, day: date) -> pd.DataFrame:
+def load_bookticker(symbol: str, day: date, source: str = "auto") -> pd.DataFrame:
     """Full raw L1 stream for one day (~39M rows, ~2 GB for BTCUSDT). Prefer sample_book."""
-    tbl = pa.Table.from_batches(list(iter_day(symbol, day)))
+    tbl = pa.Table.from_batches(list(iter_day(symbol, day, source)))
     df = tbl.to_pandas()
     df["ts"] = pd.to_datetime(df["transaction_time"], unit="ms", utc=True)
     return df
@@ -194,7 +239,7 @@ def _to_ms(t: datetime) -> int:
 
 
 def sample_book(symbol: str, start: datetime, end: datetime, step_ms: int,
-                ts_col: str = "transaction_time", derived: bool = True) -> pd.DataFrame:
+                ts_col: str = "transaction_time", derived: bool = True, source: str = "auto") -> pd.DataFrame:
     """
     Book state (best bid/ask) sampled every `step_ms` on the grid start, start+step, ... < end.
 
@@ -204,6 +249,8 @@ def sample_book(symbol: str, start: datetime, end: datetime, step_ms: int,
 
     ts_col: "transaction_time" (matching engine, default) or "event_time" (when Binance
             published it; use this if you want "what a subscriber could have known").
+    source: "auto" or one of SOURCES ("archive", "recorder", "tardis", "hft") to insist on a
+            particular origin for every day (raises nothing - days without that source are skipped).
 
     Runs in constant memory: streams daily archives batch-by-batch. State carries across
     day boundaries. The first few grid points may be NaN if no update precedes them
@@ -230,7 +277,7 @@ def sample_book(symbol: str, start: datetime, end: datetime, step_ms: int,
     day = start.astimezone(timezone.utc).date()
     last_day = (end.astimezone(timezone.utc) - timedelta(milliseconds=1)).date()
     while day <= last_day and gi < n:
-        for b in iter_day(symbol, day):
+        for b in iter_day(symbol, day, source):
             t = b.column(ts_col).to_numpy()
             if t[-1] < grid[gi]:
                 offset += len(t)

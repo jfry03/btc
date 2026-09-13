@@ -22,7 +22,8 @@ The `data_collection` package holds one module per source. Conventions shared by
 ## L1 sources and the fallback chain
 
 Binance published futures `bookTicker` archives only from 2023-05-16 to 2024-03-30. The
-collectors below fill in the rest, and `bookticker.fetch_day` checks them in order. Paid and
+collectors below fill in the rest, and `bookticker.locate` checks them in order — or pass
+`source="archive" | "recorder" | "tardis" | "hft"` to [`load_l1`](loading.md) to insist on one. Paid and
 other third-party sources (Crypto Lake, CoinAPI, CryptoHFTData, …) are compared in
 [Sources & costs](../notes/sources-and-costs.md).
 
@@ -33,8 +34,9 @@ other third-party sources (Crypto Lake, CoinAPI, CryptoHFTData, …) are compare
 | 3 | Compacted recorder day | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM-DD}.parquet` | Recorder days after nightly `compact` |
 | 4 | Live recorder | `data/raw/{SYMBOL}-bookTicker-{YYYY-MM-DD}.csv.gz` | Whenever `record_bookticker` was running |
 | 5 | Tardis free day | `data/raw/tardis/binance-futures_book_ticker_{YYYY-MM-DD}_{SYMBOL}.csv.gz` | 1st of each month, 2019-11 → now |
+| 6 | CryptoHFTData replay | `data/raw/hft/{SYMBOL}-bookTicker-{YYYY-MM-DD}.parquet` | 2025-06-28 → now |
 
-Sources 1–2 are downloaded on demand; 3–5 must already be on disk (run the recorder, or
+Sources 1–2 are downloaded on demand; 3–6 must already be on disk (run the recorder, or
 `tardis_free_days`, first). `bookticker.iter_batches` normalises all four into the archive
 column layout, so `sample_book` and `load_bookticker` don't care where a day came from.
 

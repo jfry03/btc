@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTC Up/Down — TWAP implied vol</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+<style>
+  :root { --bg:#111214; --panel:#1a1c20; --line:#2a2d33; --fg:#e8e6e1; --dim:#8a8a86;
+          --blue:#4f8fe6; --orange:#f07a3c; --aqua:#25c48c; --yellow:#e6c04f; --red:#e05a5a; --grey:#9a9a96; }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:14px 18px 30px }
+  header { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 18px; margin-bottom:12px }
+  header h1 { font-size:17px; font-weight:600; margin:0 }
+  header .q { color:var(--dim) }
+  .clock { font-variant-numeric:tabular-nums; font-size:15px }
+  .phase { padding:2px 8px; border-radius:4px; font-size:12px; background:var(--line) }
+  .phase.twap { background:#1d4a38; color:#7fe0b5 }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:10px; margin-bottom:12px }
+  .tile { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px 12px; min-height:84px }
+  .tile .k { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.04em }
+  .tile .v { font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; margin:2px 0 }
+  .tile .s { color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums }
+  .tile.big .v { font-size:30px }
+  .up { color:var(--aqua) } .down { color:var(--red) } .orange { color:var(--orange) } .blue { color:var(--blue) } .yellow { color:var(--yellow) }
+  .charts { display:grid; gap:12px }
+  .chart { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 8px 4px }
+  .chart h2 { font-size:12px; font-weight:500; color:var(--dim); margin:0 0 4px 6px; text-transform:uppercase; letter-spacing:.04em }
+  .uplot { --u-bg:transparent } .u-legend { color:var(--dim); font-size:11px }
+  footer { color:var(--dim); font-size:12px; margin-top:12px; display:flex; flex-wrap:wrap; gap:6px 20px }
+  .warn { color:var(--yellow) } .bad { color:var(--red) }
+  table { border-collapse:collapse; width:100%; font-size:12px; font-variant-numeric:tabular-nums }
+  th, td { text-align:right; padding:3px 8px; border-bottom:1px solid var(--line) } th { color:var(--dim); font-weight:500 } td:first-child, th:first-child { text-align:left }
+  .pos { color:var(--aqua) } .neg { color:var(--red) }
+  .sim-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px } @media (max-width:900px) { .sim-grid { grid-template-columns:1fr } }
+  .chips { display:flex; gap:3px; margin-top:6px; flex-wrap:wrap }
+  .chip { width:14px; height:14px; border-radius:3px; background:var(--line) } .chip.up { background:var(--aqua) } .chip.down { background:var(--red) }
+</style>
+</head>
+<body>
+<header>
+  <h1>BTC Up/Down · TWAP implied vol</h1>
+  <span class="q" id="question">connecting…</span>
+  <span class="clock" id="clock"></span>
+  <span class="phase" id="phase"></span>
+</header>
+
+<div class="tiles">
+  <div class="tile"><div class="k">Chainlink BTC/USD (settlement series)</div><div class="v blue" id="spot">–</div><div class="s" id="spot_s"></div></div>
+  <div class="tile"><div class="k">Binance BTCUSDT</div><div class="v" id="binance">–</div><div class="s" id="binance_s"></div></div>
+  <div class="tile"><div class="k">Price to beat (open TWAP)</div><div class="v yellow" id="ref">–</div><div class="s" id="ref_s"></div></div>
+  <div class="tile"><div class="k">Settlement TWAP</div><div class="v orange" id="twap">–</div><div class="s" id="twap_s"></div></div>
+  <div class="tile"><div class="k">Polymarket Up</div><div class="v up" id="up">–</div><div class="s" id="up_s"></div></div>
+  <div class="tile"><div class="k">Polymarket Down</div><div class="v down" id="down">–</div><div class="s" id="down_s"></div></div>
+  <div class="tile big"><div class="k">Implied vol (annualised, Up mid, spot = Binance + basis)</div><div class="v" id="iv">–</div><div class="s" id="iv_s"></div></div>
+  <div class="tile"><div class="k">Realised in window (Chainlink, 30-s returns)</div><div class="v" id="wrv">–</div><div class="s" id="wrv_s"></div></div>
+  <div class="tile"><div class="k">Model check</div><div class="v" id="rv">–</div><div class="s" id="rv_s"></div></div>
+  <div class="tile"><div class="k">Last window</div><div class="v" id="lastres">–</div><div class="s" id="lastres_s"></div><div class="chips" id="chips"></div></div>
+</div>
+
+<div class="charts">
+  <div class="chart"><h2>Price — window, with the 60 s reference TWAP before the open and the 60 s settlement TWAP at the end</h2><div id="c1"></div></div>
+  <div class="chart"><h2>Up token mid and implied vol (log scale, rescaled each window)</h2><div id="c2"></div></div>
+</div>
+
+<h2 style="font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 8px">Paper trading — buys whichever side the model check says is cheap, Kelly-sized</h2>
+<div class="tiles">
+  <div class="tile big"><div class="k">Total P&amp;L (realised + open mark)</div><div class="v" id="sim_pnl">–</div><div class="s" id="sim_pnl_s"></div></div>
+  <div class="tile"><div class="k">Markets traded</div><div class="v" id="sim_n">–</div><div class="s" id="sim_n_s"></div></div>
+  <div class="tile"><div class="k">Position this window</div><div class="v" id="sim_pos">–</div><div class="s" id="sim_pos_s"></div></div>
+  <div class="tile"><div class="k">Rules</div><div class="v" style="font-size:15px" id="sim_rules">–</div><div class="s" id="sim_rules_s"></div></div>
+</div>
+<div class="sim-grid">
+  <div class="chart"><h2>Cumulative realised P&amp;L ($, all history)</h2><div id="c3"></div></div>
+  <div class="chart"><h2>Settled markets (latest first)</h2><div style="overflow-x:auto"><table id="sim_table"><thead><tr><th>window</th><th>side</th><th>trades</th><th>cost</th><th>fees</th><th>result</th><th>P&amp;L</th></tr></thead><tbody></tbody></table></div>
+    <h2 style="margin-top:10px">Fills this window</h2><div style="overflow-x:auto"><table id="sim_fills"><thead><tr><th>t left</th><th>side</th><th>price</th><th>shares</th><th>cost</th><th>p model</th><th>edge / req</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+
+<footer>
+  <span id="feeds"></span><span id="last"></span>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (x, d=2) => x == null ? '–' : x.toLocaleString(undefined, {minimumFractionDigits:d, maximumFractionDigits:d});
+const pct = x => x == null ? '–' : (x*100).toFixed(1) + '%';
+const bp = x => x == null ? '–' : (x >= 0 ? '+' : '') + x.toFixed(2) + ' bp';
+const hhmmss = t => new Date(t*1000).toISOString().substr(11, 8);
+const css = getComputedStyle(document.documentElement);
+const col = n => css.getPropertyValue('--' + n).trim();
+
+let S = null;                       // latest state
+let W = 0;                          // window length in s
+let clockOffset = 0;                // server time - local time (s), so the countdown runs between pushes
+let pushes = 0, pushRate = 0;       // pushes received this second / last second
+
+function shadeSettlement(u) {       // grey band = reference window before the open, green band = settlement TWAP window
+  if (!S) return;
+  const ctx = u.ctx, {top, height} = u.bbox;
+  const band = (a, b, color) => {
+    const x0 = u.valToPos(a, 'x', true), x1 = u.valToPos(b, 'x', true);
+    ctx.fillStyle = color; ctx.fillRect(x0, top, x1 - x0, height);
+  };
+  ctx.save();
+  band(S.window_start - S.twap_window, S.window_start, 'rgba(230,192,79,0.10)');
+  band(S.window_end - S.twap_window + 1, S.window_end, 'rgba(37,196,140,0.12)');
+  const xo = u.valToPos(S.window_start, 'x', true);
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(xo, top); ctx.lineTo(xo, top+height); ctx.stroke();
+  ctx.restore();
+}
+
+const axisBase = { stroke: col('dim'), grid: {stroke: col('line'), width: 1}, ticks: {stroke: col('line')}, font: '11px system-ui' };
+const timeAxis = { ...axisBase, values: (u, vs) => vs.map(v => hhmmss(v).slice(0,5) + (W <= 300 ? ':' + hhmmss(v).slice(6) : '')) };
+
+const c1 = new uPlot({
+  width: 800, height: 300, cursor: {sync: {key: 'w'}}, legend: {live: true},
+  scales: { x: {time: true}, y: {} },
+  axes: [{...timeAxis}, {...axisBase, size: 70, values: (u, vs) => vs.map(v => fmt(v, 0))}],
+  series: [
+    { label: 'time', value: (u, v) => v == null ? '' : hhmmss(v) },
+    { label: 'Chainlink', stroke: col('blue'), width: 1.5, spanGaps: true, value: (u,v) => fmt(v) },
+    { label: 'Binance + basis', stroke: col('grey'), width: 1, spanGaps: true, value: (u,v) => fmt(v) },
+    { label: 'TWAP-60s stream', stroke: col('aqua'), width: 1, dash: [3,3], spanGaps: true, value: (u,v) => fmt(v) },
+    { label: 'settlement TWAP (running)', stroke: col('orange'), width: 2.5, spanGaps: true, value: (u,v) => fmt(v) },
+    { label: 'price to beat', stroke: col('yellow'), width: 1.5, dash: [6,4], spanGaps: true, value: (u,v) => fmt(v) },
+  ],
+  hooks: { drawClear: [shadeSettlement] },
+}, [[], [], [], [], [], []], $('c1'));
+
+const c2 = new uPlot({
+  width: 800, height: 230, cursor: {sync: {key: 'w'}}, legend: {live: true},
+  scales: { x: {time: true}, p: {range: [0, 1]},
+            iv: {distr: 3, log: 10, range: (u, min, max) => (min == null || max == null) ? [0.05, 1] : [Math.max(min / 1.3, 0.002), max * 1.3]} },
+  axes: [{...timeAxis},
+         {...axisBase, scale: 'p', size: 50, values: (u, vs) => vs.map(v => v.toFixed(2))},
+         {...axisBase, scale: 'iv', side: 1, size: 60, grid: {show: false}, values: (u, vs) => vs.map(v => v == null ? '' : (v >= 0.1 ? (v*100).toFixed(0) : (v*100).toFixed(1)) + '%')}],
+  series: [
+    { label: 'time', value: (u, v) => v == null ? '' : hhmmss(v) },
+    { label: 'Up mid', scale: 'p', stroke: col('aqua'), width: 1.5, spanGaps: true, value: (u,v) => v == null ? '–' : v.toFixed(3) },
+    { label: 'implied vol (ann.)', scale: 'iv', stroke: col('orange'), width: 2, spanGaps: true, value: (u,v) => pct(v) },
+    { label: 'realised vol (EWM 10 min)', scale: 'iv', stroke: col('grey'), width: 1, dash: [3,3], spanGaps: true, value: (u,v) => pct(v) },
+    { label: 'realised in window', scale: 'iv', stroke: col('blue'), width: 1.5, dash: [6,3], spanGaps: true, value: (u,v) => pct(v) },
+  ],
+  hooks: { drawClear: [shadeSettlement] },
+}, [[], [], [], [], []], $('c2'));
+
+const c3 = new uPlot({
+  width: 400, height: 220, legend: {show: false},
+  scales: { x: {time: true}, y: {} },
+  axes: [{...axisBase, values: (u, vs) => vs.map(v => new Date(v*1000).toISOString().slice(5, 16).replace('T', ' '))},
+         {...axisBase, size: 60, values: (u, vs) => vs.map(v => '$' + v.toFixed(0))}],
+  series: [{ label: 'time' }, { label: 'P&L', stroke: col('orange'), width: 2, points: {show: true, size: 4}, value: (u,v) => v == null ? '–' : '$' + v.toFixed(2) }],
+}, [[], []], $('c3'));
+
+function resize() {
+  const w = $('c1').clientWidth || 800;
+  c1.setSize({width: w, height: 300}); c2.setSize({width: w, height: 230});
+  c3.setSize({width: $('c3').clientWidth || 400, height: 220});
+}
+
+function renderSim(sim) {
+  if (!sim) { $('sim_pnl').textContent = 'off'; return; }
+  const money = x => (x >= 0 ? '+$' : '−$') + Math.abs(x).toFixed(2);
+  const total = sim.realised + sim.open_mark, el = $('sim_pnl');
+  el.textContent = money(total); el.className = 'v ' + (total >= 0 ? 'pos' : 'neg');
+  $('sim_pnl_s').textContent = `realised ${money(sim.realised)} · open ${money(sim.open_mark)} · fees paid $${sim.fees.toFixed(2)} · $${sim.invested.toFixed(0)} deployed over ${sim.n_markets} markets`;
+  $('sim_n').textContent = sim.n_markets;
+  $('sim_n_s').textContent = sim.n_markets ? `${sim.n_wins} won (${(100*sim.n_wins/sim.n_markets).toFixed(0)}%) · ${sim.n_trades} fills · avg ${money(sim.realised / sim.n_markets)} per market` : `${sim.n_trades} fills so far`;
+  const pos = sim.position || {}, sides = Object.keys(pos);
+  if (sides.length) {
+    $('sim_pos').innerHTML = sides.map(sd => `<span class="${sd.toLowerCase()}">${sd} ${pos[sd].shares.toFixed(0)}</span>`).join(' + ');
+    $('sim_pos_s').textContent = sides.map(sd => `${sd} avg ${pos[sd].avg.toFixed(3)} cost $${pos[sd].cost.toFixed(0)}${pos[sd].mark == null ? '' : ' mark ' + money(pos[sd].mark)}`).join(' · ');
+  } else { $('sim_pos').textContent = 'flat'; $('sim_pos_s').textContent = 'no fills this window yet'; }
+  const pr = sim.params;
+  $('sim_rules').textContent = `${pr.kelly}× Kelly · $${pr.bankroll} / market`;
+  $('sim_rules_s').textContent = `edge ≥ ${(pr.edge_min*100).toFixed(0)}¢ at 0.50 (probit-scaled up towards the tails) · never buy above ${pr.max_price} · fees 7%·p(1−p) · no trades in last ${pr.min_seconds_left}s · fills capped at shown ask size`;
+  c3.setData([sim.curve.t, sim.curve.pnl]);
+  const cls = x => x >= 0 ? 'pos' : 'neg';
+  $('sim_table').querySelector('tbody').innerHTML = (sim.recent || []).map(r =>
+    `<tr><td>${hhmmss(r.start).slice(0,5)}–${hhmmss(r.end).slice(0,5)}</td><td class="${r.sides.join('').toLowerCase()}">${r.sides.join('+')}</td><td>${r.n_trades}</td><td>$${r.cost.toFixed(0)}</td><td>$${r.fees.toFixed(2)}</td><td class="${r.outcome.toLowerCase()}">${r.outcome}</td><td class="${cls(r.pnl)}">${money(r.pnl)}</td></tr>`).join('');
+  $('sim_fills').querySelector('tbody').innerHTML = (sim.current_trades || []).slice().reverse().map(t =>
+    `<tr><td>${t.seconds_left}s</td><td class="${t.side.toLowerCase()}">${t.side}</td><td>${t.price.toFixed(2)}</td><td>${t.shares.toFixed(0)}</td><td>$${t.cost.toFixed(0)}</td><td>${t.p_model.toFixed(3)}</td><td>${(t.edge*100).toFixed(1)}¢ / ${(t.edge_req*100).toFixed(1)}¢</td></tr>`).join('');
+}
+window.addEventListener('resize', resize); resize();
+
+function render(s) {
+  S = s; W = s.window_end - s.window_start;
+  const m = s.model || {}, tw = s.twap || {}, up = s.up || {}, dn = s.down || {};
+  $('question').textContent = s.question || s.slug;
+  clockOffset = s.time - Date.now() / 1000;
+  const ph = $('phase');
+  if (tw.started) { ph.textContent = `settlement TWAP running · ${tw.n}/${s.twap_window} samples`; ph.className = 'phase twap'; }
+  else { ph.textContent = `TWAP starts in ${tw.starts_in == null ? '–' : tw.starts_in.toFixed(0)} s`; ph.className = 'phase'; }
+
+  $('spot').textContent = fmt(s.spot);
+  $('spot_s').textContent = s.spot == null ? 'waiting for RTDS' : `1 msg/s · ${s.spot_age} s old` + (s.ref ? ` · ${bp((s.spot/s.ref - 1)*1e4)} vs ref` : '');
+  $('binance').textContent = fmt(s.binance);
+  $('binance_s').textContent = s.binance == null ? '' : `tick-level · basis ${s.basis_bp == null ? 'estimating (' + (s.basis_n || 0) + '/30 s)' : bp(s.basis_bp) + ' (10-min mean, lag-aligned)'}`;
+  $('ref').textContent = fmt(s.ref);
+  $('ref_s').textContent = (s.ref_source || '') + (s.pm_open != null && s.ref != null && s.ref_source.startsWith('TWAP')
+      ? ` · PM shows ${fmt(s.pm_open)} (${Math.abs(s.ref - s.pm_open) < 0.005 ? 'agrees' : 'diff ' + (s.ref - s.pm_open).toFixed(2)})` : '');
+  $('ref_s').className = 's' + (s.ref == null ? ' bad' : (s.ref_source.startsWith('estimate') ? ' warn' : ''));
+
+  if (tw.started) {
+    $('twap').textContent = fmt(tw.running);
+    $('twap_s').textContent = `${tw.n}/${s.twap_window} samples` + (s.ref && tw.running ? ` · ${bp((tw.running/s.ref - 1)*1e4)} vs ref` : '')
+      + (m.expected_twap ? ` · expected final ${fmt(m.expected_twap)}` : '');
+  } else {
+    $('twap').textContent = 'not started';
+    $('twap_s').textContent = m.expected_twap ? `expected final ${fmt(m.expected_twap)} (${bp(m.d_bp)})` : `starts ${hhmmss(s.window_end - s.twap_window + 1)} UTC`;
+  }
+
+  const book = (b) => (b.bid == null && b.ask == null) ? '–' : `${b.bid == null ? '–' : b.bid.toFixed(2)} / ${b.ask == null ? '–' : b.ask.toFixed(2)}`;
+  $('up').textContent = up.mid == null ? '–' : up.mid.toFixed(3);
+  $('up_s').textContent = `bid/ask ${book(up)}` + (up.last != null ? ` · last ${up.last.toFixed(2)}` : '');
+  const dmid = (dn.bid != null && dn.ask != null) ? (dn.bid + dn.ask)/2 : null;
+  $('down').textContent = dmid == null ? '–' : dmid.toFixed(3);
+  $('down_s').textContent = `bid/ask ${book(dn)}` + (dn.last != null ? ` · last ${dn.last.toFixed(2)}` : '');
+
+  const ivEl = $('iv');
+  if (m.iv_ann != null) {
+    ivEl.textContent = pct(m.iv_ann); ivEl.className = 'v';
+    const range = [m.iv_ask_ann, m.iv_bid_ann].filter(x => x != null).sort((a,b) => a-b);
+    $('iv_s').textContent = `bid–ask ${range.length === 2 ? pct(range[0]) + ' – ' + pct(range[1]) : '–'} · d ${bp(m.d_bp)} · c ${m.c == null ? '–' : m.c.toFixed(2)} √s · spot ${fmt(s.model_spot)} (${s.model_spot_source})`;
+  } else {
+    ivEl.textContent = 'n/a'; ivEl.className = 'v warn';
+    $('iv_s').textContent = m.note || (s.ref == null ? 'reference unknown' : up.mid == null ? 'no Up book yet' : s.seconds_left <= 0 ? 'window over' : '');
+  }
+  const wr = s.window_realised || {};
+  $('wrv').textContent = wr.vol_ann == null ? '–' : pct(wr.vol_ann);
+  const rangeBp = (wr.high != null && s.ref) ? `range ${bp((wr.low/s.ref - 1)*1e4)} … ${bp((wr.high/s.ref - 1)*1e4)} vs ref` : (wr.high != null ? `high ${fmt(wr.high)} low ${fmt(wr.low)}` : '');
+  $('wrv_s').textContent = wr.vol_ann == null ? `${wr.elapsed || 0} s elapsed · needs ≥ 15 s of Chainlink prices` :
+      `${wr.elapsed} s elapsed (~${Math.max(1, Math.round(wr.n / 30))} indep. samples) · ${rangeBp}` + (m.iv_ann != null ? ` · implied ${pct(m.iv_ann)}` : '');
+  $('rv').textContent = m.p_up_at_rv == null ? '–' : `P(Up) ${m.p_up_at_rv.toFixed(3)}`;
+  $('rv_s').textContent = m.rv30_ann == null ? 'realised vol needs ≥ 2.5 min of Chainlink history' : `model P(Up) at realised vol ${pct(m.rv30_ann)} (EWM, 10-min half-life, 30-s returns) · market ${up.mid == null ? '–' : up.mid.toFixed(3)}`;
+
+  renderSim(s.sim);
+  const f = s.feeds || {}, ages = f.ages || {};
+  const age = k => ages[k] == null ? 'no data' : ages[k].toFixed(0) + ' s ago';
+  $('feeds').innerHTML = `RTDS ${f.rtds} (chainlink ${age('crypto_prices_chainlink')}, twap ${age('crypto_prices_twap_sixty')}) · Binance ${f.binance} (${age('binance')}) · CLOB ${f.clob} (${age('clob')}) · ${pushRate} pushes/s`;
+  const lr = s.last_result;
+  const lrEl = $('lastres');
+  if (lr) {
+    lrEl.textContent = lr.outcome || 'ref unknown'; lrEl.className = 'v ' + (lr.outcome === 'Up' ? 'up' : lr.outcome === 'Down' ? 'down' : 'warn');
+    $('lastres_s').textContent = `${hhmmss(lr.start)}–${hhmmss(lr.end)} · close ${fmt(lr.close)} vs ref ${fmt(lr.ref)} (${bp(lr.move_bp)})`;
+  } else {
+    lrEl.textContent = '–'; lrEl.className = 'v'; $('lastres_s').textContent = 'first window to settle this session';
+  }
+  $('chips').innerHTML = (s.results || []).map(r => `<span class="chip ${r.outcome === 'Up' ? 'up' : r.outcome === 'Down' ? 'down' : ''}" title="${hhmmss(r.start)} ${r.outcome || '?'} ${bp(r.move_bp)}"></span>`).join('');
+  $('last').textContent = (s.results || []).length ? `${s.results.length} windows settled this session: ${s.results.filter(r => r.outcome === 'Up').length} Up / ${s.results.filter(r => r.outcome === 'Down').length} Down` : '';
+
+  if (!s.series) return;            // light pushes carry no chart series; those arrive ~1/s
+  const se = s.series, refLine = se.t.map(() => s.ref);
+  c1.setData([se.t, se.chainlink, se.binance, se.twap60, se.running, refLine]);
+  const pos = v => (v != null && v > 0) ? v : null;      // log scale: drop zero / undefined vols
+  const rvLine = se.t.map(() => pos(m.rv30_ann));
+  c2.setData([se.t, se.up_mid, se.iv_ann.map(pos), rvLine, se.wrv_ann.map(pos)]);
+  c1.setScale('x', {min: s.window_start - s.twap_window, max: s.window_end});
+  c2.setScale('x', {min: s.window_start - s.twap_window, max: s.window_end});
+}
+
+function tickClock() {              // runs every frame; the server only has to push when something changed
+  if (S) {
+    const left = S.window_end - (Date.now() / 1000 + clockOffset);
+    $('clock').textContent = `${hhmmss(S.window_start)} → ${hhmmss(S.window_end)} UTC · ${Math.max(0, left).toFixed(1)} s left`;
+  }
+  requestAnimationFrame(tickClock);
+}
+requestAnimationFrame(tickClock);
+setInterval(() => { pushRate = pushes; pushes = 0; }, 1000);
+
+function connect() {
+  const es = new EventSource('/api/stream');
+  es.onmessage = ev => {
+    pushes++;
+    const s = JSON.parse(ev.data);
+    if (s.window_start) render(s); else $('question').textContent = s.status || 'starting';
+  };
+  es.onerror = () => { $('question').textContent = 'stream lost — reconnecting…'; es.close(); setTimeout(connect, 1000); };
+}
+connect();
+</script>
+</body>
+</html>
